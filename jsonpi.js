@@ -1,4 +1,6 @@
-
+/**
+ * @author Fredrik Blomqvist
+ */
 define(['blq/assert', 'jquery', 'goog/base'], function(assert, $) {
 
 // namespace

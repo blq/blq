@@ -1,4 +1,11 @@
-
+/**
+ * Web Notification.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Notification
+ * http://caniuse.com/#feat=notifications
+ *
+ * @author Fredrik Blomqvist
+ *
+ */
 define(['blq/assert', 'jquery'], function(assert, $) {
 
 // namespace

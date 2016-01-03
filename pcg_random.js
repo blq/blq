@@ -1,9 +1,16 @@
 /**
+ * @fileoverview
  * quick test to implement the PCG random number generator
  * http://www.pcg-random.org/
  *
  * specifically the basic subset:
  * @see https://github.com/imneme/pcg-c-basic/blob/master/pcg_basic.c
+ *
+ * for proper integration api see:
+ * @see https://github.com/blq/mochikit/blob/master/MochiKit/Random.js
+ * @see https://github.com/blq/mochikit/blob/master/MochiKit/_MersenneTwister19937.js
+ *
+ * @author Fredrik Blomqvist
  *
  */
 

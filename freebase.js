@@ -1,4 +1,8 @@
-
+/**
+ * @fileoverview
+ * hmm, freebase is dead now.. :(
+ *  
+ */
 define(['assert', 'jquery'], function(assert, $) {
 
 /**

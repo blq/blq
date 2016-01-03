@@ -1,4 +1,8 @@
-
+/**
+ *
+ * @author Fredrik Blomqvist
+ *
+ */
 define(['blq/assert', 'jquery', 'blq/readfile'], function(assert, $, reader) {
 
 var blq = {};
@@ -53,6 +57,7 @@ blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
 		hoverClass: 'indicate_drop'
 	}, options);
 
+	//------ experimental test --
 	// by default Don't allow drag drop on any element!
 	// -> set cursor to indicate denied.
 	// todo: ? cursor change doesn't seem to work anyway?
@@ -67,6 +72,7 @@ blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
 		console.debug('prevented drag drop');
 		$('html').removeClass('nodrop');
 	});
+	//---------
 
 	// decide whether to use delegated event or direct attach
 	var delegated = typeof elem == 'string';

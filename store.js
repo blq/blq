@@ -62,7 +62,7 @@ var store = {
 	},
 
 	// expose a MochiKit.Iterator (todo: ES6!?)
-	// (assumes noone messes with too much with the storage during iteration (goes backwards similar to .each()) )
+	// (assumes noone messes too much with the storage during iteration (goes backwards similar to .each()) )
 	// iterator returns: { key, value }
 	__iterator__: function() {
 		var i = localStorage.length - 1;

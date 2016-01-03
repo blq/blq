@@ -1,8 +1,13 @@
-
+/**
+ * @see https://code.google.com/p/dat-gui/
+ *
+ * @author Fredrik Blomqvist
+ *
+ */
 define(['blq/assert', 'jquery', 'dat/gui/GUI'], function(assert, $, GUI) {
 
 /**
- * sets up a DAT GUI using on declarative a json style config
+ * sets up a DAT GUI using a declarative json style config
  * @see https://code.google.com/p/dat-gui/
  *
  * example:

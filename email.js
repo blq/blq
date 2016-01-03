@@ -1,4 +1,6 @@
-
+/**
+ * @author Fredrik Blomqvist
+ */
 define(['jquery', 'MochiKit/Text'], function($) {
 
 // namespace
