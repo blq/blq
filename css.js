@@ -5,7 +5,7 @@
  * @author Fredrik Blomqvist
  *
  */
-define(['blq/assert', '$', 'MochiKit/Iter', 'MochiKit/Iter-ext'], function(assert, $) {
+define(['blq/assert', 'jquery', 'MochiKit/Iter', 'MochiKit/Iter-ext'], function(assert, $) {
 
 // namespace
 var css = {}
