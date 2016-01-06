@@ -409,7 +409,7 @@ css.setCssFilter = function(elem, name, value) {
 	// (could do it lazily once and cache)
 	// for even more support could technically use a SVG-filter also but don't think it's worth it
 	// for IE6(!)-IE9 we could use: filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='3'); }
-	$.each([ 'filter', '-webkit-filter', '-moz-filter', '-ms-filter' ], function(idx, filter) {
+	[ 'filter', '-webkit-filter', '-moz-filter', '-ms-filter' ].forEach(function(filter) {
 		var filters = $elem.css(filter);
 		if (filters == null)
 			return; // continue
