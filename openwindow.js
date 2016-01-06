@@ -21,6 +21,8 @@ var blq = {};
  * todo: do we need the url with hash # fix? (Chrome (still!) can't immediately pan to a #, only after a (delayed) second "push" using win.location = win.location after win loaded..)
  * todo: helper for setting up postMessage communication with new window?
  *
+ * todo: option to use dom.getScrollbarWidth() to add margin to avoid scrollbars? (options.fitToContent? noVerticalScroll? or such)
+ *
  * note that same title/name will refresh/replace a previously opened win!
  *
  * @param {string=} url
