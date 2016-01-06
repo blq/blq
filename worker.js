@@ -202,9 +202,9 @@ worker.makeFnWorkerPromise = function(fn) {
 			w.onerror = function(err) {
 				w.terminate();
 				// ! 'err' will not be same error as the worker threw.
-				// Workers can't return or propagate Error() objs.
-				// todo: or re-wrap? new Error(err) ?
-				reject(err);
+				// Workers can't return or propagate Error() objs, only get a string.
+				// thus we re-wrap. ok?
+				reject(new Error(err));
 			};
 			// can't post the 'arguments' object
 			w.postMessage(Array.prototype.slice.call(arguments));
@@ -281,6 +281,6 @@ worker.makeFnWorkerAsyncOnce = function(fn) {
 };
 
 
-return worker
+return worker;
 
 });
