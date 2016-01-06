@@ -40,6 +40,19 @@ url.getAbsoluteUrl = function(url) {
 	return self._a.href;
 };
 
+/**
+ * "NOP image", 1x1 8-bit GIF as a data URI.
+ * @see https://en.wikipedia.org/wiki/Data_URI_scheme
+ * Useful to avoid the ugly "no image" icon in many browsers.
+ *
+ * idea "stolen" from Leaflet src, L.Util.emptyImageUrl
+ * todo: ok module for this?
+ *
+ * @type {string}
+ * @const
+ */
+url.emptyImageUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
 
 return url;
 
