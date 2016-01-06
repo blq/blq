@@ -4,12 +4,13 @@
  * @see http://www.w3.org/TR/workers/
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
  *
- * Also injects itself into the 'blq' namespace (change?)
- *
  * @author Fredrik Blomqvist
  *
  */
 define(['blq'], function(blq) {
+
+// namespace
+var worker = {};
 
 /**
  * Prerequirement for createInlineWebWorker, makeFnWorkerAsync etc
@@ -20,7 +21,7 @@ define(['blq'], function(blq) {
  *
  * @return {boolean}
  */
-blq.isInlineWebWorkerSupported = function() {
+worker.isInlineWebWorkerSupported = function() {
 	var Blob = window.Blob || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder; // fallback handled in _createBlob()
 	var URL = window.URL || window.webkitURL;
 	var Worker = window.Worker;
@@ -38,10 +39,10 @@ blq.isInlineWebWorkerSupported = function() {
  * @param {function()|string} fnJs worker code. Must not use 'this', use 'self' instead. And of course not assume any other outside references!
  * @return {?string} can be fed directly to the Worker constructor. null if not supported
  */
-blq._createInlineWebWorkerURL = function(fnJs)  {
+worker._createInlineWebWorkerURL = function(fnJs)  {
 	assert(fnJs != null); // typically a function but with a string we have full freedom. see blq.makeFnWorkerAsync for example
 
-	if (!blq.isInlineWebWorkerSupported()) {
+	if (!worker.isInlineWebWorkerSupported()) {
 		console.error('Inline Web Worker not supported');
 		return null;
 	}
@@ -91,21 +92,21 @@ blq._createInlineWebWorkerURL = function(fnJs)  {
  * @see http://caniuse.com/#feat=webworkers Android 4.4+, IE10+
  * @see http://caniuse.com/#feat=blobbuilder Android 46+ (4.1+ with fallback). IE10+(not with JS content?)
  *
- * @see blq._createInlineWebWorkerURL
- * @see blq.makeFnWorkerAsync() for simpler run-once case.
+ * @see worker._createInlineWebWorkerURL
+ * @see worker.makeFnWorkerAsync() for simpler run-once case.
  *
  * todo: helper to import other scripts?
  *
  * @param {function()|string} js worker code. Must not use 'this', use 'self' instead. And of course not assume any other outside references!
  * @return {Worker} null if not supported. Use 'worker.postMessage(params)' to start and send messages. Use 'worker.onmessage = callback' (or addEventListener) to receive data.
  */
-blq.createInlineWebWorker = function(js) {
-	var url = blq._createInlineWebWorkerURL(js);
+worker.createInlineWebWorker = function(js) {
+	var url = worker._createInlineWebWorkerURL(js);
 	if (url == null)
 		return null;
-	var worker = new Worker(url);
+	var w = new Worker(url);
 	URL.revokeObjectURL(url); // free resource right away (seems worse for debugging though..)
-	return worker;
+	return w;
 };
 
 
@@ -135,13 +136,13 @@ blq.createInlineWebWorker = function(js) {
  * @param {function()} fn Must be a Pure function. Take (read-only) input, return a result. No other external access.
  * @return {function(): !Deferred} function has same signature as input fn, but returns Deferred. Deferred will also have '.worker' property for access
  */
-blq.makeFnWorkerAsync = function(fn) {
+worker.makeFnWorkerAsync = function(fn) {
 	assert(typeof fn == 'function');
 
 	var workerJs = 'self.onmessage = function(e) { self.postMessage(('+fn.toString()+').apply(self, e.data)) }';
 	// todo: better to create url once up-front, but never call revokeObjectURL. Or create once per call and use 'revokeObjectURL' directly?
 	// todo: or perhaps cache these? (look up using toString-code and pool?)
-	var workerUrl = blq._createInlineWebWorkerURL(workerJs);
+	var workerUrl = worker._createInlineWebWorkerURL(workerJs);
 
 	return function(/*args*/) {
 		var d = new MochiKit.Async.Deferred(function() {
@@ -183,7 +184,7 @@ blq.makeFnWorkerAsync = function(fn) {
  * @param {function()) fn
  * @return {function(): !Promise} Promise will have '.worker' as a property
  */
-blq.makeFnWorkerPromise = function(fn) {
+worker.makeFnWorkerPromise = function(fn) {
 	assert(typeof fn == 'function');
 
 	var workerJs = 'self.onmessage = function(e) { self.postMessage(('+fn.toString()+').apply(self, e.data)) }';
@@ -192,20 +193,21 @@ blq.makeFnWorkerPromise = function(fn) {
 
 	return function(/*args*/) {
 		return new Promise(function(resolve, reject) {
-			var worker = new Worker(workerUrl);
-			this.worker = worker; // expose to caller. ok?
-			worker.onmessage = function(e) {
-				worker.terminate();
+			var w = new Worker(workerUrl);
+			this.worker = w; // expose to caller. ok?
+			w.onmessage = function(e) {
+				w.terminate();
 				resolve(e.data);
 			};
-			worker.onerror = function(err) {
-				worker.terminate();
+			w.onerror = function(err) {
+				w.terminate();
 				// ! 'err' will not be same error as the worker threw.
 				// Workers can't return or propagate Error() objs.
+				// todo: or re-wrap? new Error(err) ?
 				reject(err);
 			};
 			// can't post the 'arguments' object
-			worker.postMessage(Array.prototype.slice.call(arguments));
+			w.postMessage(Array.prototype.slice.call(arguments));
 		});
 	};
 };
@@ -226,12 +228,12 @@ blq.makeFnWorkerPromise = function(fn) {
  * @param {function()} fn
  * @return {function(): !Deferred} function will have property '.worker' (! the function, Not the Deferred, contrary to makeFnWorkerAsync)
  */
-blq.makeFnWorkerAsyncOnce = function(fn) {
+worker.makeFnWorkerAsyncOnce = function(fn) {
 	assert(typeof fn == 'function');
 
 	// inject a uid each call so we can match with the corresponding event-handler
 	// (since we use a single worked we have to attach multiple listeners using addEventListener)
-	var worker = blq.createInlineWebWorker('self.onmessage = function(e) { self.postMessage({ uid: e.data.uid, ret: ('+fn.toString()+').apply(self, e.data.args) }) }');
+	var w = worker.createInlineWebWorker('self.onmessage = function(e) { self.postMessage({ uid: e.data.uid, ret: ('+fn.toString()+').apply(self, e.data.args) }) }');
 
 	var workerFn = function(/*args*/) {
 		var d = new MochiKit.Async.Deferred();
@@ -242,8 +244,8 @@ blq.makeFnWorkerAsyncOnce = function(fn) {
 				return;
 
 			// once!
-			worker.removeEventListener('message', onMessage, false);
-			// worker.removeEventListener('error', onError, false);
+			w.removeEventListener('message', onMessage, false);
+			// w.removeEventListener('error', onError, false);
 
 			d.callback(e.data.ret);
 		}
@@ -255,16 +257,16 @@ blq.makeFnWorkerAsyncOnce = function(fn) {
 		// 	// ! 'err' will not be same error as the worker threw.
 		// 	// Workers can't return or propagate Error() objs.
 
-		// 	worker.removeEventListener('message', onMessage, false);
-		// 	worker.removeEventListener('error', onError, false);
+		// 	w.removeEventListener('message', onMessage, false);
+		// 	w.removeEventListener('error', onError, false);
 
 		// 	d.errback(err);
 		// }
 
-		worker.addEventListener('message', onMessage, false);
-		// worker.addEventListener('error', onError, false);
+		w.addEventListener('message', onMessage, false);
+		// w.addEventListener('error', onError, false);
 
-		worker.postMessage({
+		w.postMessage({
 			uid: uid,
 			args: Array.prototype.slice.call(arguments) // can't post the 'arguments' object
 		});
@@ -273,12 +275,12 @@ blq.makeFnWorkerAsyncOnce = function(fn) {
 	};
 
 	// expose the worker (basically to allow terminate)
-	workerFn.worker = worker;
+	workerFn.worker = w;
 
 	return workerFn;
 };
 
 
-return blq;
+return worker
 
 });
