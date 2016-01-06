@@ -41,6 +41,26 @@ sniff.isNodeJS = function() {
 };
 
 
+
+/**
+ * todo: more tests in mobiles
+ * @see also https://github.com/bdougherty/BigScreen
+ *
+ * @param {Window=} [win=window]
+ * @return {boolean}
+ */
+sniff.isFullScreen = function(win) {
+	win = win || window;
+	// http://stackoverflow.com/questions/2863351/checking-if-browser-is-in-fullscreen
+	// http://stackoverflow.com/questions/1047319/detecting-if-a-browser-is-in-full-screen-mode
+	// 'window.fullScreen' only in Firefox
+
+	// todo: does this need some 1-pixel tolerance margin or such maybe?
+	return typeof win.fullScreen == 'boolean' ? win.fullScreen : (win.innerWidth == screen.width && win.innerHeight == screen.height);
+};
+
+
+
 return sniff;
 
 });
