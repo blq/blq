@@ -1,4 +1,8 @@
-
+/**
+ *
+ * @author Fredrik Blomqvist
+ *
+ */
 define(['blq/assert'], function(assert) {
 
 // namespace

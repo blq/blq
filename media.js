@@ -1,5 +1,8 @@
-
-
+/**
+ *
+ * @author Fredrik Blomqvist
+ *
+ */
 define(['blq/assert', 'jquery', 'blq/dom', 'blq/openwindow'], function(assert, $, dom, openwin) {
 
 // namespace
