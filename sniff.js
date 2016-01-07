@@ -26,11 +26,15 @@ sniff.isMobileBrowser = function() {
 };
 
 
-// todo: in android homescreen manifest add "?homescreen=true" in qs
+/**
+ * todo: in android homescreen manifest could manually add "?homescreen=true" in qs and use that as detection
+ * @return {boolean}
+ */
 sniff.isHomeScreenApp = function() {
 	// only IOS!
 	return !!navigator.standalone; // todo: check url
 };
+
 
 /**
  * are we running in NodeJS ?
@@ -39,7 +43,6 @@ sniff.isHomeScreenApp = function() {
 sniff.isNodeJS = function() {
 	return typeof process != 'undefined' && !process.browser;
 };
-
 
 
 /**
@@ -59,6 +62,23 @@ sniff.isFullScreen = function(win) {
 	return typeof win.fullScreen == 'boolean' ? win.fullScreen : (win.innerWidth == screen.width && win.innerHeight == screen.height);
 };
 
+
+/**
+ * @see http://caniuse.com/#search=cors
+ * doesn't care about IE (i.e now basically only for older Android)
+ * @return {boolean}
+ */
+sniff.hasCORS = function() {
+	return window.XMLHttpRequest && 'withCredentials' in new window.XMLHttpRequest;
+};
+
+/**
+ * @return {boolean}
+ */
+sniff.hasGeolocation = function() {
+	// ! subtle.. @see https://github.com/Leaflet/Leaflet/issues/3404
+	return 'geolocation' in navigator;
+};
 
 
 return sniff;
