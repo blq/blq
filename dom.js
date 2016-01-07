@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * @author Fredrik Blomqvist
  *
  */
@@ -97,6 +97,44 @@ dom.createSVG = function(tag, attrs) {
 	}
 	return el;
 };
+
+
+/**
+ * document -> window
+ * extracted from jQuery source (not exposed in the interface)
+ * @param {Element} elem
+ * @return {Window}
+ */
+dom.getElementWindow = function(elem) {
+	return $.isWindow(elem) ?
+		elem :
+		elem.nodeType === 9 ?
+			elem.defaultView || elem.parentWindow :
+			null;
+};
+
+/**
+ * @param {HTMLIFrameElement|jQuerySelector} iframe
+ * @return {Document}
+ */
+dom.getIframeDocument = function(iframe) {
+	assert(iframe != null);
+
+	// return iframe.contentDocument || iframe.contentWindow.document;
+	return $(iframe).contents()[0] || null;
+};
+
+/**
+ * @param {HTMLIFrameElement|jQuerySelector} iframe
+ * @return {Window}
+ */
+dom.getIframeWindow = function(iframe) {
+	assert(iframe != null);
+
+	var doc = dom.getIframeDocument(iframe);
+	return doc ? dom.getElementWindow(doc) : null;
+};
+
 
 
 return dom;
