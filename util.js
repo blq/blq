@@ -5,6 +5,7 @@
  */
 define(['blq/assert'], function(assert) {
 
+// namespace
 var util = {};
 
 
@@ -64,6 +65,20 @@ util.escapeHtml = function(strHtml) {
 		.replace(/'/g, "&#039;") // _Not_ "&apos;" (not part of html standard)
 		//.replace(/\x00/g, "&#0;") // ?
 		.replace(/`/g, "&#96;");
+};
+
+/**
+ * @private
+ * @type {number} // integer
+ */
+util._uid_count = 0;
+
+/**
+ * ok? goog/base.js has same name but requires arg to attach to.
+ * @return {number} unique (per session) integer id
+ */
+util.getUid = function() {
+	return util._uid_count++;
 };
 
 

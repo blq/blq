@@ -1,7 +1,7 @@
 /**
  * @author Fredrik Blomqvist
  */
-define(['blq/assert', 'jquery', 'goog/base'], function(assert, $) {
+define(['blq/assert', 'jquery', 'blq/util'], function(assert, $, util) {
 
 // namespace
 var jsonpi = {};
@@ -26,7 +26,7 @@ jsonpi.callJSONPI = function(url, params, options) {
 		parseResponse: JSON.parse // todo: or allow a more "brutal" eval() ?
 	}, options);
 
-	var name = '__blq_jsonpi_ '+goog.getUid({});
+	var name = '__blq_jsonpi_ '+util.getUid();
 	var iframe = $('<iframe>', {
 		name: name,
 		width: 0, height: 0,
@@ -60,7 +60,7 @@ jsonpi.callJSONPI = function(url, params, options) {
 		try {
 			// grab the (json) content
 			// var msg = $(this.contentWindow.document.body).text();	// or (iframe.contentDocument || iframe.contentWindow.document)
-			var msg = $(this).contents().find('body').text(); // should be more portable (see Mobile.getIframeDocument)
+			var msg = $(this).contents().find('body').text(); // should be more portable (see dom.getIframeDocument)
 			var ret = typeof options.parseResponse == 'function' ? options.parseResponse(msg) : msg;
 
 			d.resolve(ret);
