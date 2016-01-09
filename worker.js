@@ -7,7 +7,7 @@
  * @author Fredrik Blomqvist
  *
  */
-define(['blq'], function(blq) {
+define(['blq/util'], function(util) {
 
 // namespace
 var worker = {};
@@ -51,7 +51,7 @@ worker._createInlineWebWorkerURL = function(fnJs)  {
 	// string input is assumed to know about the worker message api, or already be a self-running function or unwrapped code.
 	var fnstr = typeof fnJs == 'function' ? '('+fnJs.toString()+').call(self, self)' : fnJs;
 
-	var blob = blq._createBlob([fnstr], 'application/javascript');
+	var blob = util._createBlob([fnstr], 'application/javascript');
 	var URL = window.URL || window.webkitURL; // todo: put in a helper fn also? (easy polyfill)
 	var url = (blob != null && URL != null) ? URL.createObjectURL(blob) : null;
 
@@ -167,8 +167,8 @@ worker.makeFnWorkerAsync = function(fn) {
 			d.worker.terminate();
 			delete d.worker;
 			// ! 'err' will not be same error as the worker threw.
-			// Workers can't return or propagate Error() objs.
-			d.errback(err);
+			// Workers can't return or propagate Error() objs, thus we re-wrap it.
+			d.errback(new Error(err));
 		};
 		// can't post the 'arguments' object
 		d.worker.postMessage(Array.prototype.slice.call(arguments));
@@ -192,6 +192,7 @@ worker.makeFnWorkerPromise = function(fn) {
 	var workerUrl = URL.createObjectURL(new Blob([workerJs], { type: 'application/javascript' }));
 
 	return function(/*args*/) {
+		var args = Array.prototype.slice.call(arguments); // can't post the raw 'arguments' object
 		return new Promise(function(resolve, reject) {
 			var w = new Worker(workerUrl);
 			this.worker = w; // expose to caller. ok?
@@ -206,8 +207,7 @@ worker.makeFnWorkerPromise = function(fn) {
 				// thus we re-wrap. ok?
 				reject(new Error(err));
 			};
-			// can't post the 'arguments' object
-			w.postMessage(Array.prototype.slice.call(arguments));
+			w.postMessage(args);
 		});
 	};
 };
@@ -237,7 +237,7 @@ worker.makeFnWorkerAsyncOnce = function(fn) {
 
 	var workerFn = function(/*args*/) {
 		var d = new MochiKit.Async.Deferred();
-		var uid = goog.getUid(d);
+		var uid = util.getUid();
 
 		function onMessage(e) {
 			if (uid != e.data.uid) // only care about our id!
@@ -260,7 +260,7 @@ worker.makeFnWorkerAsyncOnce = function(fn) {
 		// 	w.removeEventListener('message', onMessage, false);
 		// 	w.removeEventListener('error', onError, false);
 
-		// 	d.errback(err);
+		// 	d.errback(new Error(err));
 		// }
 
 		w.addEventListener('message', onMessage, false);
@@ -268,7 +268,7 @@ worker.makeFnWorkerAsyncOnce = function(fn) {
 
 		w.postMessage({
 			uid: uid,
-			args: Array.prototype.slice.call(arguments) // can't post the 'arguments' object
+			args: Array.prototype.slice.call(arguments) // can't post the raw 'arguments' object
 		});
 
 		return d;
