@@ -27,7 +27,7 @@ sniff.isMobileBrowser = function() {
 
 
 /**
- * todo: in android homescreen manifest could manually add "?homescreen=true" in qs and use that as detection
+ * todo: in Android homescreen manifest could manually add "?homescreen=true" in qs and use that as detection
  * @return {boolean}
  */
 sniff.isHomeScreenApp = function() {
@@ -73,11 +73,22 @@ sniff.hasCORS = function() {
 };
 
 /**
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Geolocation
  * @return {boolean}
  */
 sniff.hasGeolocation = function() {
 	// ! subtle.. @see https://github.com/Leaflet/Leaflet/issues/3404
 	return 'geolocation' in navigator;
+};
+
+
+/**
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
+ * @return {boolean}
+ */
+sniff.hasES6Iterator = function() {
+	// yes, typeof Symbol.iterator == 'symbol'. But skip that to allow polyfilling and avoid possible warning/err in litners/closure.
+	return typeof Symbol == 'function' && typeof Symbol.iterator != 'undefined';
 };
 
 
