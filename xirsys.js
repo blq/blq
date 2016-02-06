@@ -62,7 +62,7 @@ xirsys._validateXirSysParams = function(params) {
  * @param {!{ identity: string, domain: string, secret: string, application: string=, room: string= }} params
  * @return {!jQuery.Promise} auth config data (ice-servers etc). Can be passed directly to Peer.js constructor's 'config' arg.
  */
-xirsys._getXirSysIceServerAuth = function(params) {
+xirsys.getXirSysIceServerAuth = function(params) {
 	assert(params != null);
 
 	params = $.extend({
