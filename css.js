@@ -60,6 +60,7 @@ css.loadCSS = function(url, id) {
 /**
  * todo: support custom documents/root nodes to add to?
  * ok name? addStyleString?
+ * @see css.getSheet() maybe better?
  *
  * @param {string} css
  * @return {!HTMLStyleElement} generated style node (typically ignored)
@@ -436,6 +437,36 @@ css.setCssFilter = function(elem, name, value) {
 
 	return $elem;
 };
+
+
+/**
+ * Returns a CSSStyleSheet that is attached to current document (singleton style)
+ * Typically used as: getSheet().insertRule("header { float: left; opacity: 0.8; }", 1);
+ * Full sheet API @see https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet
+ *
+ * @see https://davidwalsh.name/add-rules-stylesheets
+ * @see css.injectCSS()
+ * todo: support specific document?
+ *
+ * @return {!CSSStyleSheet}
+ */
+css.getSheet = function() {
+	// create only one sheet and cache it
+	if (css.getSheet.__sheet == null) {
+		// Create the <style> tag
+		var style = document.createElement('style');
+
+		// WebKit hack :(
+		style.appendChild(document.createTextNode(''));
+
+		// Add the <style> element to the page
+		document.head.appendChild(style);
+
+		css.getSheet.__sheet = style.sheet;
+	}
+	return css.getSheet.__sheet;
+};
+
 
 
 return css;
