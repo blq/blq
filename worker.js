@@ -189,6 +189,8 @@ worker.makeFnWorkerPromise = function(fn) {
 
 	var workerJs = 'self.onmessage = function(e) { self.postMessage(('+fn.toString()+').apply(self, e.data)) }';
 	// todo: or create and destroy the url also per call? this will live long now(?) (or will GC understand cleanup?)
+	// todo: profile to see if worth it.
+	// todo: or expose a ".dispose" method or such on the worker/Promise below?
 	var workerUrl = URL.createObjectURL(new Blob([workerJs], { type: 'application/javascript' }));
 
 	return function(/*args*/) {

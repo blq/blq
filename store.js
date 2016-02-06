@@ -44,7 +44,7 @@ var store = {
 
 	// cheaper than get(key) != null
 	has: function(key) {
-		// as said, only checks for key (I think it's ok, but store.js checks value != undefined for example)
+		// as said, only checks for key (I think it's ok, but store.js checks value != undefined also for example)
 		return key in localStorage;
 	},
 
@@ -52,10 +52,12 @@ var store = {
 	// for performance reasons (json serialization) (ok? worth it?). (passing the index would be of little use).
 	// if callback returns 'false' breaks the loop (following jQuery's each-convention).
 	// todo: or split in two? each(key, value) & eachKey(key) ?
+	// -> or use the new ES6 iteration instead!
 	each: function(callback) {
 		// ! always iterate backwards. Then both add and remove(of current elem) can be done by the callback in the loop.
 		for (var i = localStorage.length - 1; i >= 0; --i) {
 			var key = localStorage.key(i);
+			// todo: value? or do callback(key, val) ?
 			var ret = callback(key);
 			if (ret === false)
 				break;
@@ -101,7 +103,7 @@ if (typeof MochiKit != 'undefined' && typeof MochiKit.Iter != 'undefined') {
 
 
 // sniff for ES6 iterator support
-// (typeof Symbol.iterator == 'symbol'. But skip that to allow polyfilling and avoid possible warning/err in litners/closure)
+// (typeof Symbol.iterator == 'symbol'. But skip that to allow polyfilling and avoid possible warning/err in linters/closure)
 if (typeof Symbol == 'function' && typeof Symbol.iterator != 'undefined') {
 
 	// enables for example: for (let elem of store) { .. }

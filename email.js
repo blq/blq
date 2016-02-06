@@ -12,7 +12,8 @@ var mail = {};
  *
  * input either string or { email: string, cc: string: bcc: string, subject: string, body: string } all fields optional.
  * (doesn't validate the email format).
- *
+ * todo: hmm, tel: skype: etc might be similar I guess?
+ * 
  * @param {string|{email: string=, cc: string=, bcc: string=, subject: string=, body: string=}} email  multiple mails can be comma separated. all fields are optional.
  * @param {string=} [subject]
  * @param {string=} [body] can include newlines (multiple blank newlines seems to collapse to just one it at least my mail prog it seems)
