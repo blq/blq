@@ -43,7 +43,8 @@ remember.enable = function(root) {
 			return;
 		}
 
-		var type = elem.prop('nodeName') + '.' + (elem.attr('type') || '_');
+		// todo: do we need to worry about upper-/lower case? (xhtml? vs html) @see http://ejohn.org/blog/nodename-case-sensitivity/
+		var type = elem.prop('nodeName').toUpperCase() + '.' + (elem.attr('type') || '_').toLowerCase();
 		// var key = 'blq.remember/' + type + ':' + id; // todo: store the type in key also?
 		// ! no, updating values would then need to extract the type each time onchange, before it can check if
 		// any value exist at all - slower! (worth it?).
