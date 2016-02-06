@@ -60,6 +60,9 @@ sniff.isFullScreen = function(win) {
 
 	// todo: does this need some 1-pixel tolerance margin or such maybe?
 	return typeof win.fullScreen == 'boolean' ? win.fullScreen : (win.innerWidth == screen.width && win.innerHeight == screen.height);
+
+	// todo: does this work now?
+	// return document.fullscreen || document.mozFullScreen || document.webkitIsFullScreen || document.msFullscreenElement || false;
 };
 
 
