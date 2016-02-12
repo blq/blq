@@ -14,8 +14,9 @@ var css = {}
  * load and add CSS to the current document.
  * note that it doesn't keep track of already loaded.
  * todo: support custom document to append to?
+ * @see https://github.com/filamentgroup/loadCSS
  *
- * @param {string} url
+ * @param {string} url 	todo: support an array?
  * @param {string=} [id]
  * @return {!jQuery.Promise} observe that this callback only specifies when the CSS is loaded by Ajax, Not when it's fully active in the document..
  */
@@ -45,7 +46,7 @@ css.loadCSS = function(url, id) {
 		id: id, // todo: generate a default id if not supplied?
 		rel: 'stylesheet',
 		type: 'text/css',
-		media: 'screen', // necessary?
+		media: 'screen', // necessary? or'all'?
 		// event
 		load: function(e) {
 			d.resolve(this);
@@ -55,6 +56,20 @@ css.loadCSS = function(url, id) {
 	$('head').append(link);
 	return d.promise();
 };
+
+/*
+ * todo: or this method? https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery
+
+ var cb = function() {
+     var l = document.createElement('link'); l.rel = 'stylesheet';
+     l.href = 'small.css';
+     var h = document.getElementsByTagName('head')[0]; h.parentNode.insertBefore(l, h);
+   };
+   var raf = requestAnimationFrame || mozRequestAnimationFrame ||
+       webkitRequestAnimationFrame || msRequestAnimationFrame;
+   if (raf) raf(cb);
+   else window.addEventListener('load', cb);
+ */
 
 
 /**
@@ -101,18 +116,16 @@ css.cssGfxInit = function() {
 };
 
 /**
- * todo: add a cssinit to load custom css also
+ * todo: add a cssInit to load custom css also
  * see http://monkeyandcrow.com/blog/drawing_lines_with_css3/
  * todo: make the target node default to current document? (need to move it in arg order..)
  *
- * @param {!jQuerySelector} node html
  * @param {!Pos} p0
  * @param {!Pos} p1
  * @param {{ 'class': string }} [opt] additional classes (todo: support full attributes?)
- * @return {!Node} <div> (already added to node)
+ * @return {!Node} <div>
  */
-css.cssLine = function(node, p0, p1, opt) {
-	assert(node != null);
+css.cssLine = function(p0, p1, opt) {
 	assert(p0 != null);
 	assert(p1 != null);
 
@@ -144,19 +157,18 @@ css.cssLine = function(node, p0, p1, opt) {
 		}
 	}));
 
-	return line.appendTo(node).get(0);
+	return line.get(0);
 };
 
 
 /**
  * todo: cssPolygon also or just use a 'close' flag?
- * @param {!jQuerySelector} node
+ *
  * @param {!Iterable.<!Pos>} vertices
  * @param {Object=} [opt]
  * @return {!HTMLElement} <div>
  */
-css.cssPolyline = function(node, vertices, opt) {
-	assert(node != null);
+css.cssPolyline = function(vertices, opt) {
 	assert(vertices != null); // todo: iterable/array check
 
 	// todo: extend attributes also
@@ -177,7 +189,7 @@ css.cssPolyline = function(node, vertices, opt) {
 	forEach(MochiKit.Iter.pairView(vertices), function(seg) {
 		$(css.cssLine(root, seg[0], seg[1], opt)).removeClass('line');
 	});
-	return root.appendTo(node).get(0);
+	return root.get(0);
 };
 
 
@@ -185,14 +197,12 @@ css.cssPolyline = function(node, vertices, opt) {
  * todo: or implement using ellipse? This might help conceptually though
  * todo: option to decide if anchor position should be UL or centre? (now UL)
  *
- * @param {!jQuerySelector} node
  * @param {!Pos} pos
  * @param {number} r
  * @param {Object=} [opt]
  * @return {!HTMLElement} <div>
  */
-css.cssCircle = function(node, pos, r, opt) {
-	assert(node != null);
+css.cssCircle = function(pos, r, opt) {
 	assert(pos != null);
 	assert(typeof r == 'number');
 
@@ -224,7 +234,7 @@ css.cssCircle = function(node, pos, r, opt) {
 		}
 	}));
 
-	return circle.appendTo(node).get(0);
+	return circle.get(0);
 };
 
 
@@ -232,14 +242,12 @@ css.cssCircle = function(node, pos, r, opt) {
  * todo: or create a fully generic mathematial style taking the two focal points? (to allow rotation also)
  * todo: option to decide if anchor position should be UL or centre? (now UL)
  *
- * @param {!jQuerySelector} node
  * @param {!Pos} pos
  * @param {!Size} size
  * @param {Object=} [opt]
  * @return {!HTMLElement} <div>
  */
-css.cssEllipse = function(node, pos, size, opt) {
-	assert(node != null);
+css.cssEllipse = function(pos, size, opt) {
 	assert(pos != null);
 	assert(size != null);
 
@@ -263,17 +271,15 @@ css.cssEllipse = function(node, pos, size, opt) {
 		}
 	}));
 
-	return ellipse.appendTo(node).get(0);
+	return ellipse.get(0);
 };
 
 /**
- * @param {!jQuerySelector} node
  * @param {!Bounds} bounds pos UL + size
  * @param {Object=} [opt]
  * @return {!HTMLElement} <div>
  */
-css.cssRect = function(node, bounds, opt) {
-	assert(node != null);
+css.cssRect = function(bounds, opt) {
 	assert(bounds != null);
 
 	var attr = $.extend(true, {
@@ -295,7 +301,7 @@ css.cssRect = function(node, bounds, opt) {
 		}
 	}));
 
-	return rect.appendTo(node).get(0);
+	return rect.get(0);
 };
 
 
@@ -303,15 +309,13 @@ css.cssRect = function(node, bounds, opt) {
  * todo: not ready!
  * todo: expose some of the typical common triangles as shorthand (up, down, left, right)
  *
- * @param {!jQuerySelector} node
  * @param {!Pos} p0
  * @param {!Pos} p1
  * @param {!Pos} p2
  * @param {Object=} [opt]
  * @return {!HTMLElement}
  */
-css.cssTriangle = function(node, p0, p1, p2, opt) {
-	assert(node != null);
+css.cssTriangle = function(p0, p1, p2, opt) {
 	assert(p0 != null);
 	assert(p1 != null);
 	assert(p2 != null);
@@ -336,7 +340,71 @@ css.cssTriangle = function(node, p0, p1, p2, opt) {
 		}
 	}));
 
-	return tri.appendTo(node).get(0);
+	return tri.get(0);
+};
+
+
+css.circleWithText = function(pos, r, text, opt) {
+
+// todo: @see see http://jsfiddle.net/tyt6s14z/24/
+// .btn {
+//     color: #64bc8a;
+//
+//     padding: 10px; /* should be related to the font size */
+//     font-size: 23px;
+//
+//     border: 1px solid #64bc8a;
+// }
+//
+// .circle {
+//     border-radius: 100%; /* lower gives a rounded rect */
+//     max-width: 100%;
+//     text-align: center;
+//     display: inline-block;
+//     line-height: 1;
+// }
+//
+// .circle:before {
+//     content: '';
+//     display: inline-block;
+//     width: 100%;
+//     height: 0;
+//     padding-bottom: 100%;
+//     vertical-align: middle;
+//     line-height: 1;
+// }
+//
+// .circle span {
+//     display: inline-block;
+//     line-height: 1;
+//     max-width: 100%;
+//     margin-left: -100%;
+//     vertical-align: middle;
+// }
+
+
+	var circle = $('<div>', {
+		css: {
+			'border-radius': '100%'
+			'max-width': '100%', // todo: pixels also?
+			'text-align': 'center',
+			'display': 'inline-block',
+			'line-height': 1
+		}
+	});
+	var text = $('<span>', {
+		text: text,
+		css: {
+			'display': 'inline-block',
+			'line-height': 1,
+			'max-width': '100%',
+			'margin-left': '-100%',
+			'vertical-align': 'middle'
+		}
+	});
+	circle.append(text);
+
+	return circle.get(0);
 };
 
 // todo: cssPixel? cssSprite? (would be good to try out xfrm on images etc)
@@ -369,7 +437,7 @@ css.refreshCSS = function(sel) { // rename? refreshDocumentCSS?
 /**
  * for example, @see http://davidwalsh.name/demo/css-filters.php
  * for browser support @see http://caniuse.com/#feat=css-filters
- * todo: expose as jQuery plugin?
+ * todo: expose as a jQuery plugin?
  *
  * @param {!jQuerySelector} elem
  * @param {string} name todo: or create and take an enum?
