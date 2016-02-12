@@ -33,11 +33,11 @@ blq.mochiKitDeferredTojQueryPromise = function(md) {
 
 /**
  * Experimental.
- * "hacks" MK.Deferred to also expose methods that makes its interface
- * compatible with corresponding jQuery.Promise style (jQ 1.8 state, i.e without methods deprecated in 1.7+)
+ * "hacks" MK.Deferred to also expose methods that makes its interface compatible
+ * with the corresponding jQuery.Promise style (jQ 1.8 state, without methods deprecated in 1.7+)
  * I.e a user of a function that returns a MK.Deferred will be "fooled" to believe it's a jQ.Promise.
  *
- * : after this fn is called (nor arg case) all new MochiKit.Async.Deferreds will also carry the jQ.Promise interface!
+ * : after this fn is called (no arg case) all new MochiKit.Async.Deferreds will also carry the jQ.Promise interface!
  * todo: would be possible to create the inverse of this function also, BUT, currently MK internals use "instanceof" couple of places.
  *
  * Everything except the error handling propagation can be mimiced (jQuery doesn't try-catch and propagate!)
@@ -45,7 +45,7 @@ blq.mochiKitDeferredTojQueryPromise = function(md) {
  * Also the progress() callback is a NOP since it has not MK equivalent. Should be kindof ok since code shouldn't be desinged to fundamentally rely on it..
  *
  * Yes, would (almost) be possible to mimic entire jQuery.Deferred also but more cumbersome and not quite as useful anyway.
- * Since a *consumer* (caller) does not not use/need the full Deferred-resolve interface anyway, only the Promise part. Similarily, the
+ * Since a *consumer* (caller) does not use/need the full Deferred-resolve interface anyway, only the Promise part. Similarily, the
  * *producer* of the Promise has all the info and shouldn't need to be "fooled"!
  *
  * todo: move to MK.Async directly?
@@ -184,7 +184,7 @@ blq.lockPromiseCall = function(fn) {
 			p = fn.apply(this, arguments);
 			// only when resolved do we allow next call
 			// todo: hmm, could argue that if fn _doesn't_ return
-			// a promise we should do the same? do mimic full behviour.
+			// a promise we should do the same? to mimic full behaviour.
 			p.then(function() { p = null; }, function() { p = null; });
 		}
 		return p;
