@@ -15,6 +15,7 @@ define([], function() {
 // @const
 var store = {
 	// todo: detection code? (private mode browsing. fallback to in-memory emulation?)
+	// store.enabled: boolean ?
 
 	get: function(key) {
 		return JSON.parse(store.getRaw(key));
@@ -29,6 +30,11 @@ var store = {
 		return value; // chain
 	},
 
+	/**
+	 * bypasses the json serializaton
+	 * @param {string} key
+	 * @param {*} value
+	 */
 	setRaw: function(key, value) {
 		localStorage.setItem(key, value);
 		return value; // chain
@@ -42,7 +48,11 @@ var store = {
 		localStorage.clear();
 	},
 
-	// cheaper than get(key) != null
+	/**
+	 * cheaper than get(key) != null
+	 * @param {string} key
+	 * @return {boolean}
+	 */
 	has: function(key) {
 		// as said, only checks for key (I think it's ok, but store.js checks value != undefined also for example)
 		return key in localStorage;
@@ -65,6 +75,9 @@ var store = {
 		return callback; // kindof useful in case the callback accumulates "something" during the run (FP idiom)
 	},
 
+	/**
+	 * @return {!Object}
+	 */
 	getAll: function() {
 		var all = {};
 		store.each(function(key) {
