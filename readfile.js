@@ -7,14 +7,14 @@
 define(['blq/assert', 'jquery'], function(assert, $) {
 
 // namespace
-var blq = {};
+var ns = {};
 
 /**
  * @see blq.listenForDragDrop() and blq.readFile() options
  * @see blq.readFile() options
  * @enum {string}
  */
-blq.ReadFileFormat = {
+ns.ReadFileFormat = {
 	DataURL: 'dataurl',
 	Base64: 'base64',
 	BinaryString: 'binarystring',
@@ -28,7 +28,7 @@ blq.ReadFileFormat = {
  * @param {string} dataUrl
  * @return {{mimeType: string, data: string}} null if error
  */
-blq.parseDataUrl = function(dataUrl) {
+ns.parseDataUrl = function(dataUrl) {
 	assert(typeof dataUrl == 'string');
 
 	// todo: or assert starts with 'data:'?
@@ -54,17 +54,17 @@ blq.parseDataUrl = function(dataUrl) {
  * todo: expose specifying the encoding? (utf-8 is default)
  *
  * @param {!(File|Blob)} file (typically from <file> or drag'n drop operation)
- * @param {{output: (blq.ReadFileFormat|string)}=} [options] (or just call it 'mode' or such?)
+ * @param {{output: (ReadFileFormat|string)}=} [options] (or just call it 'mode' or such?)
  * @return {!jQuery.Promise} will also push progress updates using notify()
  */
-blq.readFile = function(file, options) {
+ns.readFile = function(file, options) {
 	assert(file != null);
 
-	options = $.extend({
-		output: blq.ReadFileFormat.Base64 // ok default?
-	}, options);
+	options = options || {};
+	options.output = options.output || ns.ReadFileFormat.Base64 // ok default?
 	assert(typeof options.output == 'string');
 
+	// todo: switch to ES6 Promise? (or injected impl?)
 	var d = jQuery.Deferred();
 
 	// @see https://developer.mozilla.org/en-US/docs/DOM/FileReader
@@ -73,7 +73,7 @@ blq.readFile = function(file, options) {
 		var data = this.result; // == e.target.result
 
 		if (options.output == 'base64') {
-			var urlData = blq.parseDataUrl(data);
+			var urlData = ns.parseDataUrl(data);
 			if (urlData == null) {
 				// error!
 				console.warn('blq.readFile: empty dataUrl');
@@ -134,6 +134,6 @@ blq.readFile = function(file, options) {
 };
 
 
-return blq;
+return ns;
 
 });
