@@ -82,6 +82,62 @@ util.getUid = function() {
 };
 
 
+//////////
+	// run when your page is done
+	// (assumes noone wipes out entire <body> contents..)
+	// todo: opt-out if not on a Mobile browser? (Desktop case probably don't want fullscreen. also not in Cordova)
+	// @see http://caniuse.com/#feat=fullscreen
+	function enableFirstClickFullscreen() {
+		// @see https://brad.is/coding/BigScreen/
+		if (window.BigScreen == null || !BigScreen.enabled) {
+			console.warn('FullScreen API not supported');
+			return;
+		}
+
+		// or prepend as first elem? must try to ensure above all other elems
+		// yes, plain 'document' event would work, *unless* iframe..
+		$('body').append($('<div>', {
+			id: 'fullscreen_helper',
+			css: {
+				// width: '100%', height: '100%',
+				position: 'fixed',
+				top: 0, left: 0,
+				right: 0, bottom: 0,
+				margin: 0,
+			 	'z-index': 6666
+			},
+			on: {
+				// just using "click" works of course but can confuse, specially
+				// on phones were toch-drag-pan (map!) is common and which doesn't fire a click
+				// causing illusion of ui being frozen.
+				// todo: ! *only* use touch-event and only mobiles will get this behavior - as intended!
+				'touchstart mousedown': function() {
+					console.debug('first tap! -> fullscreen');
+					// in case events don't fire hide this right away
+					$('#fullscreen_helper').hide();
+					// if (!Mobile.isFullScreen()) // not really necessary. might risk case for false negative?
+						BigScreen.request();
+
+				}
+			}
+		}));
+
+		// todo: doesn't work in IE11...
+		BigScreen.onenter = function() {
+		    // called when the first element enters full screen
+			console.debug('going fullscreen!');
+			$('#fullscreen_helper').hide();
+		};
+
+		BigScreen.onexit = function() {
+		    // called when all elements have exited full screen
+			console.debug('exiting fullscreen mode');
+			$('#fullscreen_helper').show();
+		};
+	}
+////////////////
+
+
 return util;
 
 });
