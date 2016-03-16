@@ -199,6 +199,18 @@ math.frac = function(v) {
 	return v - Math.floor(v);
 };
 
+/**
+ * unnormalized Sinc
+ * @see https://en.wikipedia.org/wiki/Sinc_function 
+ * @param {number} x (0 is undefined)
+ * @return {number}
+ */
+math.sinc = function(x) {
+	// todo: 0-epsilon check?
+	return Math.sin(x) / x;
+};
+
+
 // debug export
 // window._math = math;
 
