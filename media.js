@@ -52,7 +52,7 @@ media.toDataUrl = function(source) {
  * @see canvas lib also imageToImageData()
  *
  * @param {!Image} img
- * @return {string}
+ * @return {string} data URI
  */
 media.getBase64Image = function(img) {
 	assert(img != null);

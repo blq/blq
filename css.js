@@ -385,7 +385,7 @@ css.circleWithText = function(pos, r, text, opt) {
 
 	var circle = $('<div>', {
 		css: {
-			'border-radius': '100%'
+			'border-radius': '100%',
 			'max-width': '100%', // todo: pixels also?
 			'text-align': 'center',
 			'display': 'inline-block',
