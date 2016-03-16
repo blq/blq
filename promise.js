@@ -1,10 +1,12 @@
 /**
  *
  */
-define(['blq/assert', 'jquery', 'MochiKit/Async'], function(assert, $) {
+define(['blq/assert', 'jquery', 'polyfills/es6-promise', 'MochiKit/Async'], function(assert, $, _promise) {
 
 // namespace
 var blq = {};
+
+var bind = MochiKit.Base.bind;
 
 /**
  * @param {!(jQuery.Deferred|jQuery.Promise)} jd (just saying Promise is actually enough since Deferred inherits from it. but add both for clarity)
