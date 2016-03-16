@@ -17,6 +17,7 @@ media.polyfill = {};
 // ok? or just create a helper fn and skip actual polyfill?
 // @see https://github.com/addyosmani/getUserMedia.js
 media.polyfill.enableGetUserMedia = function() {
+	// todo: is this deprecated? see MediaDevices.getUserMedia()
 	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 	window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 };
@@ -33,12 +34,26 @@ media._getMediaSources = function() {
 	var d = $.Deferred();
 
 	if (typeof MediaStreamTrack == 'undefined' || typeof MediaStreamTrack.getSources == 'undefined') {
-		console.warn('MediaStreamTrack not supported');
-		return d.reject().promise();
+		var msg = 'MediaStreamTrack not supported';
+		console.warn(msg);
+		return d.reject(msg).promise();
 	}
 
 	// todo: can this be slow? (could use d.notify() per source!)
 	// todo: cache this?
+	// todo: Chrome says this is deprecated? use: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices
+/*
+navigator.mediaDevices.enumerateDevices()
+.then(function(devices) {
+  devices.forEach(function(device) {
+    console.log(device.kind + ": " + device.label +
+                " id = " + device.deviceId);
+  });
+})
+.catch(function(err) {
+  console.log(err.name + ": " + error.message);
+});
+*/
 	MediaStreamTrack.getSources(function(sources) {
 		var cams = [];
 		var mics = [];
@@ -84,8 +99,8 @@ media._getVideoUrl = function(sourceId) {
 
 	// assumes navigator.getUserMedia and window.URL exists (or has been polyfilled)
 	// todo: or handle polyfill/fallback here?
-	assert(navigator.getUserMedia != null);
-	assert(window.URL != null);
+	// assert(navigator.getUserMedia != null);
+	// assert(window.URL != null);
 
 	var constraints = {
 		// todo: audio?
@@ -97,6 +112,7 @@ media._getVideoUrl = function(sourceId) {
 
 	var d = $.Deferred();
 	navigator.getUserMedia(constraints,
+	// MediaDevices.getUserMedia(constraints, // ?
 		function(stream) {
 			var videoUrl = window.URL.createObjectURL(stream);
 			d.resolve(videoUrl);
