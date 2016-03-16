@@ -98,6 +98,8 @@ if (typeof MochiKit != 'undefined' && typeof MochiKit.Iter != 'undefined') {
 	// todo: hmm, or expose this as a store.enableMochKitIter? then a user can enable even if MK is loaded after this file.
 	// (maybe try something like this to set a "soft" dependency? http://stackoverflow.com/questions/14164610/requirejs-optional-dependency/27422370#27422370  hmm, still not quite. we want only opt-in if someone _else_ requires MK..)
 	store['__iterator__'] = function() {
+		// todo: hmm, maybe you could argue that the index in this case
+		// could/should be made to lazily initialize on the first next() call?
 		var i = localStorage.length - 1;
 		return {
 			next: function() {
@@ -122,6 +124,8 @@ if (typeof Symbol == 'function' && typeof Symbol.iterator != 'undefined') {
 	// enables for example: for (let elem of store) { .. }
 	// @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
 	store[Symbol.iterator] = function() {
+		// todo: hmm, maybe you could argue that the index in this case
+		// could/should be made to lazily initialize on the first next() call?
 		var i = localStorage.length - 1;
 		return {
 			next: function() {
