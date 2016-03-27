@@ -7,6 +7,9 @@
  */
 define([], function() {
 
+// namespace
+var sniff = {};
+
 /**
  * Detect if we are running in a browser context
  * @return {boolean}
