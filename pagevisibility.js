@@ -47,8 +47,10 @@ pagevis.pageVisible = (function() {
 		};
 	}
 
-	return function(c) {
-		if (c) document.addEventListener(eventKey, c);
+	return function(callback) {
+		if (callback) document.addEventListener(eventKey, function() {
+			callback(!document[stateKey]);
+		});
 		return !document[stateKey];
 	};
 })();
