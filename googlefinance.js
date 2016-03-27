@@ -13,6 +13,9 @@ var finance = {
 };
 
 // todo: the values could be "refined" to more fitting types. now always strings it seems..
+// @see https://www.quora.com/What-do-the-following-attributes-returned-in-a-JSON-array-from-the-Google-Finance-API-mean
+// @see http://www.quantatrisk.com/2015/05/07/hacking-google-finance-in-pre-market-trading-python/
+
 /* example return:
 {
 c: "-1.02"
