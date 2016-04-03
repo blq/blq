@@ -98,6 +98,19 @@ sniff.hasES6Iterator = function() {
 };
 
 
+// sniff.isPortrait = function() {
+// 	return window.innerHeight > window.innerWidth;
+// };
+
+/**
+ * @return {boolean} silently returns false if orientation is not available (i.e desktop)
+ */
+sniff.isLandscape = function() {
+	// todo: or use: window.screen.orientation ?
+	return typeof window.orientation != 'undefined' ? (window.orientation == 90 || window.orientation == -90) : false;
+};
+
+
 return sniff;
 
 });
