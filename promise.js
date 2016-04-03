@@ -1,7 +1,7 @@
 /**
  *
  */
-define(['blq/assert', 'jquery', 'polyfills/es6-promise', 'MochiKit/Async'], function(assert, $, _promise) {
+define(['blq/assert', RELEASE ? 'jquery.min' : 'jquery', RELEASE ? 'polyfills/es6-promise.min' : 'polyfills/es6-promise', 'MochiKit/Async'], function(assert, $, _promise) {
 
 // namespace
 var blq = {};
@@ -223,6 +223,20 @@ blq.queuePromises = function(fn) {
 	// 	}
 	// 	return p;
 	// };
+};
+
+/**
+ * simple wrapper around requirejs call.
+ * (assumes require.js is loaded)
+ * @param {!Array.<string>|string} scripts
+ * @return {!Promise}
+ */
+blq.requirePromise = function(scripts) {
+	scripts = Array.isArray(scripts) ? scripts : [scripts];
+
+	return new Promise(function(resolve, reject) {
+		require(scripts, resolve, reject);
+	});
 };
 
 
