@@ -1,7 +1,7 @@
 /**
  * @fileoverview
- * Initially used store.js https://github.com/marcuswestin/store.js/ but since we don't care about IE we just go for native now.
- * JSON encoding by default, use 'Raw' fn otherwise.
+ * Initially used store.js https://github.com/marcuswestin/store.js/ but since we don't care about IE we just go for native now, API is inspired.
+ * JSON encoding by default, use the '*Raw' fns otherwise.
  *
  * Exposes an ES6 iterator and MochiKit.Iterator if available.
  *
@@ -17,10 +17,14 @@ var store = {
 	// todo: detection code? (private mode browsing. fallback to in-memory emulation?)
 	// store.enabled: boolean ?
 
+	// todo: maybe optional 2nd fallback value arg?
 	get: function(key) {
 		return JSON.parse(store.getRaw(key));
 	},
 
+	/**
+	 * bypasses the json de-serializaton
+	 */
 	getRaw: function(key) {
 		return localStorage.getItem(key);
 	},
@@ -54,7 +58,7 @@ var store = {
 	 * @return {boolean}
 	 */
 	has: function(key) {
-		// as said, only checks for key (I think it's ok, but store.js checks value != undefined also for example)
+		// as said, only checks for existence of key (I think it's ok, but store.js checks value != undefined also for example)
 		return key in localStorage;
 	},
 
@@ -125,7 +129,7 @@ if (typeof Symbol == 'function' && typeof Symbol.iterator != 'undefined') {
 	// @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
 	store[Symbol.iterator] = function() {
 		// todo: hmm, maybe you could argue that the index in this case
-		// could/should be made to lazily initialize on the first next() call?
+		// could/should be made to lazily initialize on the very first next() call? (hmm, that would be case of starting from 0.. maybe need to change to that to be consistent then?)
 		var i = localStorage.length - 1;
 		return {
 			next: function() {
