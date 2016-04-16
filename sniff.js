@@ -25,6 +25,7 @@ sniff.isBrowser = function() {
  * @return {boolean}
  */
 sniff.isMobileBrowser = function() {
+	// todo: check check in webvr boilerplate?
 	return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
 
@@ -108,6 +109,16 @@ sniff.hasES6Iterator = function() {
 sniff.isLandscape = function() {
 	// todo: or use: window.screen.orientation ?
 	return typeof window.orientation != 'undefined' ? (window.orientation == 90 || window.orientation == -90) : false;
+};
+
+
+/**
+ * basically https or localhost pass.
+ * typically a prerequisite for using webrtc stuff on Chrome (geolocation, webcam etc)
+ * @return {boolean}
+ */
+sniff.isSecureDomain = function() {
+	return location.protocol == 'https:' || location.host.toLowerCase().startsWith('localhost');
 };
 
 
