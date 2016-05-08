@@ -19,7 +19,7 @@
  * @author Fredrik Blomqvist
  *
  */
-define([	
+define([
 	RELEASE ? 'polyfills/es6-promise.min' : 'polyfills/es6-promise', // todo: should maybe be injected by default always somehow?
 	RELEASE ? 'jquery.min' : 'jquery', // todo: drop. only $.extend is used now
 	// 'blq',
@@ -153,8 +153,8 @@ var chat = {
 				}
 			});
 
-			
-			return new Promise(function(resolve, reject) {					
+
+			return new Promise(function(resolve, reject) {
 
 				function _resolve(id) {
 					chat.peer.removeListener('error', _reject);
@@ -261,35 +261,36 @@ var chat = {
 				if (c == null) {
 					var msg = 'peer.connect returned null. Probably invalid init';
 					console.warn(msg);
-					return d.reject(new Error(msg)).promise(); // (hmm, why doesn't reject/resolve return a promise directly?)
+					reject(msg); // (hmm, why doesn't reject/resolve return a promise directly?)
+					return;
 				}
 				assert(c.type == 'data');
 
-				var resolve = function() {
+				var _resolve = function() {
 					// try doing more things directly in this callback to avoid possible race(!?)
-					c.removeListener('error', reject);
-					if (d.state() == 'pending') {
+					c.removeListener('error', _reject);
+					//if (d.state() == 'pending') {
 						chat._addConnection(c);
-						d.resolve(c);
-					} else
-						console.debug('connection promise double resolve!?');
+						resolve(c);
+					//} else
+					//	console.debug('connection promise double resolve!?');
 				};
-				var reject = function(err) {
-					c.removeListener('open', resolve);
-					if (d.state() == 'pending')
-						d.reject(err);
-					else
-						console.debug('connection promise double reject!?');
+				var _reject = function(err) {
+					c.removeListener('open', _resolve);
+					//if (d.state() == 'pending')
+						reject(err);
+					//else
+					//	console.debug('connection promise double reject!?');
 				};
 
 				// 1) handle the Promise
-				c.once('open', resolve);
-				c.once('error', reject);
+				c.once('open', _resolve);
+				c.once('error', _reject);
 
 				// todo: add to connectedPeers but with pending state?
 			} else {
 				console.debug('connection already exist');
-				d.resolve(c);
+				resolve(c);
 			}
 			// chat.connectedPeers[c.peer] = c;
 
