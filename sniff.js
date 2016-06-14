@@ -88,6 +88,16 @@ sniff.hasGeolocation = function() {
 	return 'geolocation' in navigator;
 };
 
+/**
+ * todo: or change this method to tristate? maybe/pending state before user has agree or not?
+ * @return {boolean}
+ */
+sniff.canUseGeolocation = function() {
+	// todo: add permissions check also? (Permissions API is asynchronous though..)
+	// secure domain is new requirement in Chrome since v50
+	return sniff.hasGeolocation() && sniff.isSecureDomain();
+};
+
 
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
@@ -119,6 +129,29 @@ sniff.isLandscape = function() {
  */
 sniff.isSecureDomain = function() {
 	return location.protocol == 'https:' || location.host.toLowerCase().startsWith('localhost');
+};
+
+
+/**
+ * @return {boolean}
+ */
+sniff.isRetinaDisplay = function() {
+	return (window.devicePixelRatio || (window.screen.deviceXDPI / window.screen.logicalXDPI)) > 1;
+};
+
+
+/**
+ * @return {boolean}
+ */
+sniff.hasTouch = function() {
+	return !!window.touch;
+};
+
+/**
+ * @return {boolean}
+ */
+sniff.hasServiceWorkers = function() {
+	return 'serviceWorker' in navigator;
 };
 
 
