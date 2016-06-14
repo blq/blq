@@ -193,15 +193,16 @@ math.trunc = function(v) {
  * -> frac(0.123) != frac(10.123) !! (0.12299999)
  * (yes, there's emulation tricks for this (also via strings!) but we don't use them!)
  *
+ * @param {number} v
  * @return {number} v
  */
 math.frac = function(v) {
-	return v - Math.floor(v);
+	return Math.abs(v - math.trunc(v));
 };
 
 /**
  * unnormalized Sinc
- * @see https://en.wikipedia.org/wiki/Sinc_function 
+ * @see https://en.wikipedia.org/wiki/Sinc_function
  * @param {number} x (0 is undefined)
  * @return {number}
  */
