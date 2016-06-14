@@ -47,8 +47,8 @@ api.getDummyTexture = function() {
  * @return {!Promise}
  */
 api.loadTexture = function(url) {
-	var loader = new THREE.TextureLoader(); // todo: should we bother caching this?
 	return new Promise(function(resolve, reject) {
+		var loader = new THREE.TextureLoader(); // todo: should we bother caching this?
 		var texture = loader.load(url,
 			function onload() {
 				resolve(texture);
