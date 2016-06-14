@@ -3,7 +3,12 @@
  * @author Fredrik Blomqvist
  *
  */
-define(['blq/assert', 'jquery', 'blq/dom', 'blq/openwindow'], function(assert, $, dom, openwin) {
+define([
+	'blq/assert', 
+	RELEASE ? 'jquery.min' : 'jquery', 
+	'blq/dom', 
+	'blq/openwindow'
+], function(assert, $, dom, openwin) {
 
 // namespace
 var media = {};
@@ -102,7 +107,7 @@ media._openScreenshotWindow = function(canvas, title) {
  * @param {HTMLCanvasElement|HTMLVideoElement|jQuerySelector} canvasOrVideo
  * @param {string=} [name]
  * @param {string=} [format='image/png'] 'image/jpeg' doesn't seem to work(?)
- * @return {!HTMLLinkElement} probably don't need this, use-case is to open immediately
+ * @return {!HTMLLinkElement} probably don't need this, use-case is to open immediately (UI)
  */
 media.grabSnapShotLink = function(canvasOrVideo, name, format) {
 	assert(canvasOrVideo != null);
@@ -124,7 +129,7 @@ media.grabSnapShotLink = function(canvasOrVideo, name, format) {
  * @see blq.grabSnapShotLink
  */
 media._grabVideoSnapshotLink = function(video, name, format) {
-	media.grabSnapShotLink(media._grabVideoSnapshot(video), name, format);
+	return media.grabSnapShotLink(media._grabVideoSnapshot(video), name, format);
 };
 
 
@@ -151,6 +156,50 @@ media.getWebGLContex = function(canvas) {
 		console.error('Unable to initialize WebGL. Your browser may not support it.');
 	}
 	return gl;
+};
+
+
+/** 
+ * grab video without inserting in document.
+ * todo: Promise? (i.e wait for load & dimensions before ready?)
+ *
+ * @param {string} src url (actually works for webcam url also)
+ * @param {Object=} [options]
+ * @return {!HTMLVideoElement} (not attached to the document)
+ */
+media.loadVideo = function(src, options) {
+	options = $.extend({
+		autoplay: false, // ! having this property is actually important for smoothness, specially for webcam (maybe bug in Chrome?)
+		muted: false,
+		loop: false	
+	}, options);
+	
+	return $('<video>', $.extend(options, {
+		src: src
+	})).get(0);
+};
+
+
+/** 
+ * ? use when want the video to be fully ready (have dimensions)
+ * typically wrap: waitForVideoReady(loadVideo('myvideo.mp4')).then(..)
+ * 
+ * @param {!HTMLVideoElement} video (yes, might already be playing)
+ * @return {!Promise} video ready, defined as ensured to have dimensions (videoWidth, videoHeight)
+ */
+media.waitForVideoReady = function(video) {
+	return new Promise(function(resolve, reject) {
+		if (video.videoWidth > 0 && video.videoHeight > 0) { // ok pre-check? (see race question below)
+			resolve(video);
+		} else {
+			// todo: fallback on spinning for video-dimensions also? (this event seems to work though)
+			// todo: hmm, race? will this fire again if we hook up after first loaded? -> TEST!
+			// or wait for "canplay"? (fires later)
+			$(video).one('loadedmetadata', function() {
+				resolve(video);
+			});
+		}
+	});
 };
 
 
