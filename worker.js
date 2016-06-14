@@ -96,6 +96,7 @@ worker._createInlineWebWorkerURL = function(fnJs)  {
  * @see worker.makeFnWorkerAsync() for simpler run-once case.
  *
  * todo: helper to import other scripts?
+ * todo: timeouts/cancel? altough best is to handle that externally, the es6 Promise don't support it, thus maybe inject?.. (MK, Bluebird etc can cancel..)
  *
  * @param {function()|string} js worker code. Must not use 'this', use 'self' instead. And of course not assume any other outside references!
  * @return {Worker} null if not supported. Use 'worker.postMessage(params)' to start and send messages. Use 'worker.onmessage = callback' (or addEventListener) to receive data.
