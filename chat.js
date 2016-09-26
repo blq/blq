@@ -125,7 +125,7 @@ var chat = {
 				secure: true,
 				key: 'peerjs', // ? seems we must use this anyway for args to match..
 				host: 'arks.herokuapp.com',
-				// port: 80, // ! in https mode heroku doesn't accept passing in ":80"(!?) -> patched peerjs to drop a null-port (at least better than stringifying null as previously..)
+				// port: 80, // ! in https mode heroku doesn't accept passing in ":80"(!?) -> patched peerjs to drop a null-port (at least better than stringifying null as previously..) -> todo: report to Peerjs!
 				port: null,
 				path: '/',
 				//-----------
