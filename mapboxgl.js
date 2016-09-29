@@ -1,27 +1,47 @@
-
+/** 
+ * @fileoverview
+ * Dynamic loader and simple wrapper for Mapbox GL
+ *
+ * @see https://www.mapbox.com/mapbox-gl-js/api/
+ * @see https://github.com/mapbox/mapbox-gl-js
+ * At time of writing v0.24.0
+ *
+ * @author Fredrik Blomqvist
+ *
+ */
 define([], function() {
 
 // namespace/export
 var api = {};
 
 /**
+ * dynamic loading of script and CSS.
  * cached.
  * see the requirejs shim for exact urls and version nr. (todo: ? no version info available when loaded?)
  * @return {!Promise}
  */
 api.loadMapBoxScript = function() { // or just loadScript() ?
-	// return new Promise(require.bind(undefined, ['mapboxgl', 'css!mapboxgl'])); // works, but slightly too terse I guess..
-
 	return new Promise(function(resolve, reject) {
-		// ! must load using requirejs since mapbox recognizes it and switches to amd mode!
-		require(['mapboxgl', 'css!mapboxgl'], resolve, reject);
+		// ! must load using requirejs since mapbox recognizes it and switches to amd mode anyway
+		require(['mapboxgl', 'css!mapboxgl'],
+			function(mapboxgl) {
+				console.log('Mapbox GL version:', mapboxgl.version);
+				// ! expose namespace globally (as if not using require).
+				// (not practical to use the API if only pass-around access I'd say)
+				window.mapboxgl = mapboxgl;
+				resolve(mapboxgl);
+			},
+			reject
+		);
 	});
 };
 
 /**
  * todo: coolest would of course be to use mapbox _inside_ the same webgl scene!
  * todo: hook the vr-controller to rotate&pitch :)
+ *
  * @see https://www.mapbox.com/mapbox-gl-js/api/
+ *
  * @return {!Promise} map instance
  */
 api.createMapBoxGL = function(container, center, opt) {
@@ -32,14 +52,14 @@ api.createMapBoxGL = function(container, center, opt) {
 		zoom: 11,
 		bearing: 0,
 		pitch: 0,
+		keyboard: false,
 
-		showMarker: false // todo: drop this
+		showGeolocation: true,
+		showScale: true
 	}, opt);
 
 	return api.loadMapBoxScript()
 		.then(function(mapboxgl) {
-			// todo: hmm, should we maybe force expose the 'mapboxgl' namespace? otherwise external code can't access the API..
-
 			mapboxgl.accessToken = opt.accessToken;
 
 			var map = new mapboxgl.Map({
@@ -47,12 +67,22 @@ api.createMapBoxGL = function(container, center, opt) {
 				style: opt.style,
 				center: center,
 				zoom: opt.zoom,
+				keyboard: opt.keyboard,
 				//
 				bearing: opt.bearing,
-				pitch: opt.pitch // todo: odd that no UI or gesture exists for pitch? (todo: write our own! two-finger vertical drag)
+				pitch: opt.pitch // todo: odd that gesture exists for pitch? (todo: write our own! two-finger vertical drag)
 			});
 
 			map.addControl(new mapboxgl.Navigation({ position: 'top-left' }));
+			if (opt.showGeolocation) {
+				// note that geolocation button apparently resets the pitch
+				map.addControl(new mapboxgl.Geolocate({position: 'top-right'}));
+			}
+			
+			if (opt.showScale) {
+				// scale control new in 0.23
+				map.addControl(new mapboxgl.Scale({position: 'bottom-left'})); // position is optional
+			}
 
 			return map;
 		})
@@ -62,57 +92,9 @@ api.createMapBoxGL = function(container, center, opt) {
 					resolve(map);
 				});
 			});
-		})
-		.then(function(map) {
-			// ehh, no easy way to add a marker yet!?.. @see https://github.com/mapbox/mapbox-gl-js/issues/656
-			// todo: expose as separate fn. todo: events?
-			if (opt.showMarker) {
-				//  map.on('style.load', function() { // alreay done previous step (might not be totally optimal, some operations works without this(?))
-
-					// todo: or use mapboxgl.GeoJSONSource ?
-					map.addSource("markers", {
-						"type": "geojson",
-						"data": {
-							"type": "Feature",
-							"geometry": {
-								"type": "Point",
-								"coordinates": center
-							},
-							"properties": {
-								"title": "You are Here!", // todo: append lat/lon?
-								"marker-color": "#63b6e5",
-								"marker-size": "large",
-								// @see https://www.mapbox.com/maki/
-								"marker-symbol": "marker"
-							}
-						}
-					});
-
-					map.addLayer({
-						"id": "markers",
-						"type": "symbol",
-						"source": "markers",
-						"layout": {
-							"icon-image": "{marker-symbol}-15",
-							"text-field": "{title}",
-							"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-							"text-offset": [0, 0.6],
-							"text-anchor": "top"
-						}
-					});
-
-				// });
-			}
-
-			return map;
 		});
 };
 
-// // todo:
-// api.addMapBoxGLMarker = function(map, marker) {
-//
-// };
-//
 
 return api;
 
