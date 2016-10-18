@@ -4,7 +4,7 @@
  *
  * @see https://www.mapbox.com/mapbox-gl-js/api/
  * @see https://github.com/mapbox/mapbox-gl-js
- * At time of writing v0.24.0
+ * At time of writing v0.26.0
  *
  * @author Fredrik Blomqvist
  *
@@ -48,12 +48,13 @@ api.createMapBoxGL = function(container, center, opt) {
 	opt = $.extend({
 		accessToken: null,
 
-		style: 'mapbox://styles/mapbox/streets-v8', // 'mapbox://styles/mapbox/dark-v8'
+		style: 'mapbox://styles/mapbox/streets-v9', // 'mapbox://styles/mapbox/dark-v9' // todo: can append "&optimize=true"
 		zoom: 11,
 		bearing: 0,
 		pitch: 0,
 		keyboard: false,
 
+		showNavigation: true,
 		showGeolocation: true,
 		showScale: true
 	}, opt);
@@ -73,15 +74,18 @@ api.createMapBoxGL = function(container, center, opt) {
 				pitch: opt.pitch // todo: odd that gesture exists for pitch? (todo: write our own! two-finger vertical drag)
 			});
 
-			map.addControl(new mapboxgl.Navigation({ position: 'top-left' }));
+			if (opt.showNavigation) {
+				map.addControl(new mapboxgl.NavigationControl({ position: 'top-left' }));
+			}
+			
 			if (opt.showGeolocation) {
 				// note that geolocation button apparently resets the pitch
-				map.addControl(new mapboxgl.Geolocate({position: 'top-right'}));
+				map.addControl(new mapboxgl.GeolocateControl({position: 'top-right'}));
 			}
 			
 			if (opt.showScale) {
 				// scale control new in 0.23
-				map.addControl(new mapboxgl.Scale({position: 'bottom-left'})); // position is optional
+				map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'})); // position is optional
 			}
 
 			return map;
