@@ -88,7 +88,7 @@ blq.getGoogleSpreadsheet = function(docId, wsId) {
 /**
  * @param {string} formId  (this is the key you see in the url of the form - Note: Not same as the spreadsheet url key used when getting data!)
  * @param {!Object} entries json dictionary {entryId->value}
- * @return {!jQuery.Promise}
+ * @return {!Promise}
  */
 blq.postToGoogleFormSpreadSheet = function(formId, entries) {
 	assert(typeof formId == 'string');
