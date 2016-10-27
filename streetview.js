@@ -1,7 +1,7 @@
 /**
  *
  */
-define(['blq/assert', 'jquery'], function(assert, $) {
+define(['blq/assert', 'jquery', 'MochiKit/Text'], function(assert, $) {
 
 // namespace
 var street = {};
