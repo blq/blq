@@ -6,6 +6,7 @@
  * Exposes an ES6 iterator and MochiKit.Iterator if available.
  *
  * todo: set/getCompressed? (using the LZ lib)
+ * todo: namespaces? store.getNamespace(namespace) -> a store.get/set API but behind a namespace?!
  *
  * @author Fredrik Blomqvist
  */
@@ -75,7 +76,7 @@ var store = {
 		// ! always iterate backwards. Then both add and remove(of current elem) can be done by the callback in the loop.
 		for (var i = localStorage.length - 1; i >= 0; --i) {
 			var key = localStorage.key(i);
-			// todo: value? or do callback(key, val) ?
+			// todo: value? or do callback(key, val) or callback(val, key) ?
 			var ret = callback(key);
 			if (ret === false)
 				break;
