@@ -62,8 +62,8 @@ api.createMapBoxGL = function(container, center, opt) {
 	return api.loadMapBoxScript()
 		.then(function(mapboxgl) {
 			mapboxgl.accessToken = opt.accessToken;
-
-			var map = new mapboxgl.Map({
+			
+			return new mapboxgl.Map({
 				container: container, // todo: overload on jQuery input?
 				style: opt.style,
 				center: center,
@@ -73,19 +73,19 @@ api.createMapBoxGL = function(container, center, opt) {
 				bearing: opt.bearing,
 				pitch: opt.pitch // todo: odd that gesture exists for pitch? (todo: write our own! two-finger vertical drag)
 			});
-
+		})
+		.then(function(map) {
+			
 			if (opt.showNavigation) {
 				map.addControl(new mapboxgl.NavigationControl({ position: 'top-left' }));
-			}
-			
+			}			
 			if (opt.showGeolocation) {
 				// note that geolocation button apparently resets the pitch
-				map.addControl(new mapboxgl.GeolocateControl({position: 'top-right'}));
-			}
-			
+				map.addControl(new mapboxgl.GeolocateControl({ position: 'top-right' }));
+			}			
 			if (opt.showScale) {
 				// scale control new in 0.23
-				map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'})); // position is optional
+				map.addControl(new mapboxgl.ScaleControl({ position: 'bottom-left' })); // position is optional
 			}
 
 			return map;
