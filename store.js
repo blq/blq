@@ -14,12 +14,16 @@ define([], function() {
 // namespace
 // @const
 var store = {
+	// replace if needed (typically if you need a reviver/replacer)
+	toJSON: JSON.stringify,
+	fromJSON: JSON.parse,
+	
 	// todo: detection code? (private mode browsing. fallback to in-memory emulation?)
 	// store.enabled: boolean ?
 
 	// todo: maybe optional 2nd fallback value arg?
 	get: function(key) {
-		return JSON.parse(store.getRaw(key));
+		return store.fromJSON(store.getRaw(key));
 	},
 
 	/**
@@ -30,7 +34,7 @@ var store = {
 	},
 
 	set: function(key, value) {
-		store.setRaw(key, JSON.stringify(value));
+		store.setRaw(key, store.toJSON(value));
 		return value; // chain
 	},
 
