@@ -1,7 +1,7 @@
 /**
  *
  */
-define(['blq/assert', RELEASE ? 'jquery.min' : 'jquery', RELEASE ? 'polyfills/es6-promise.min' : 'polyfills/es6-promise', 'MochiKit/Async'], function(assert, $, _promise) {
+define(['blq/assert', 'jquery', 'polyfills/es6-promise', 'MochiKit/Async'], function(assert, $, _promise) {
 
 // namespace
 var blq = {};
@@ -30,7 +30,7 @@ blq.mochiKitDeferredTojQueryPromise = function(md) {
 
 	var jd = jQuery.Deferred();
 	md.addCallbacks(bind(jd.resolve, js), bind(jd.reject, jd));
-	return jd.promise(); // could return jQuery.Deferred but not real use since MK.Deferred controls the trigger now!
+	return jd.promise(); // could return jQuery.Deferred but no real use since MK.Deferred controls the trigger now!
 };
 
 /**

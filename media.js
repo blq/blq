@@ -5,7 +5,7 @@
  */
 define([
 	'blq/assert', 
-	RELEASE ? 'jquery.min' : 'jquery', 
+	'jquery', 
 	'blq/dom', 
 	'blq/openwindow'
 ], function(assert, $, dom, openwin) {
