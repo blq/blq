@@ -1,4 +1,4 @@
-/** 
+/**
  * @fileoverview
  * Dynamic loader and simple wrapper for Mapbox GL
  *
@@ -52,7 +52,7 @@ api.createMapBoxGL = function(container, center, opt) {
 		zoom: 11,
 		bearing: 0,
 		pitch: 0,
-		keyboard: false,
+		keyboard: false,		
 
 		showNavigation: true,
 		showGeolocation: true,
@@ -62,7 +62,7 @@ api.createMapBoxGL = function(container, center, opt) {
 	return api.loadMapBoxScript()
 		.then(function(mapboxgl) {
 			mapboxgl.accessToken = opt.accessToken;
-			
+
 			return new mapboxgl.Map({
 				container: container, // todo: overload on jQuery input?
 				style: opt.style,
@@ -75,14 +75,14 @@ api.createMapBoxGL = function(container, center, opt) {
 			});
 		})
 		.then(function(map) {
-			
+
 			if (opt.showNavigation) {
 				map.addControl(new mapboxgl.NavigationControl({ position: 'top-left' }));
-			}			
+			}
 			if (opt.showGeolocation) {
 				// note that geolocation button apparently resets the pitch
 				map.addControl(new mapboxgl.GeolocateControl({ position: 'top-right' }));
-			}			
+			}
 			if (opt.showScale) {
 				// scale control new in 0.23
 				map.addControl(new mapboxgl.ScaleControl({ position: 'bottom-left' })); // position is optional
