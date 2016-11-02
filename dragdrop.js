@@ -61,13 +61,13 @@ blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
 	// by default Don't allow drag drop on any element!
 	// -> set cursor to indicate denied.
 	// todo: ? cursor change doesn't seem to work anyway?
-	$(window).on('dragover._blq_dragdrop', function(e) {
+	$(window).on('dragover.blq_dragdrop', function(e) {
 		e.preventDefault();
 		$('html').addClass('nodrop');
 		console.debug('prevented drag drop');
 		// e.originalEvent.dataTransfer.dropEffect = 'none';
 	});
-	$(window).on('drop._blq_dragdrop', function(e) {
+	$(window).on('drop.blq_dragdrop', function(e) {
 		e.preventDefault();
 		console.debug('prevented drag drop');
 		$('html').removeClass('nodrop');
@@ -81,7 +81,7 @@ blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
 
 	// todo: expose more callbacks here? (so user can set classes etc)
 	// todo: perhaps do a 'stopListen' ('off') first to avoid double-attach?
-	$elem.on('dragenter._blq_dragdrop', delsel, function(e) {
+	$elem.on('dragenter.blq_dragdrop', delsel, function(e) {
 		var oe = e.originalEvent;
 		if (oe.dataTransfer == null || oe.dataTransfer.types == null || oe.dataTransfer.types.length > 1 || oe.dataTransfer.types[0] != 'Files') {
 			console.log('dragDrop: only (single)file supported');
@@ -95,7 +95,7 @@ blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
 		$('html').removeClass('nodrop');
 	});
 	// todo: hmm, if container contains other eleme, i.e a helper text, this stops!?
-	$elem.on('dragover._blq_dragdrop', delsel, function(e) {
+	$elem.on('dragover.blq_dragdrop', delsel, function(e) {
 		e.preventDefault();
 		//e.stopPropagation();
 
@@ -104,14 +104,14 @@ blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
 		// seems like 'move' is the default but that might be confusing -> force a copy indicator
 		e.originalEvent.dataTransfer.dropEffect = 'copy';
  	});
-	$elem.on('dragleave._blq_dragdrop', delsel, function(e) {
+	$elem.on('dragleave.blq_dragdrop', delsel, function(e) {
 		e.preventDefault();
 		//e.stopPropagation();
 
 		$(this).removeClass(options.hoverClass);
 	});
 
-	$elem.on('drop._blq_dragdrop', delsel, function(e) {
+	$elem.on('drop.blq_dragdrop', delsel, function(e) {
 		e.preventDefault(); // don't want entire page to be replaced..
 		//e.stopPropagation();
 
@@ -164,7 +164,7 @@ blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
 blq.stopListenForDragDrop = function(elem) {
 	elem = elem || document;
 	// todo: or traverse down?
-	return $(elem).off('._blq_dragdrop');
+	return $(elem).off('.blq_dragdrop');
 };
 
 

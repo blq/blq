@@ -66,7 +66,7 @@ blq.openWindow = function(url, title, options, optWin) {
 	// note2: doesn't fire for cross-domain page (instead can throw apparently.. see below)
 	// note3: if opening/updating a second window (same name) this will not trigger second time.
 	try {
-		$(win).one('load._blq', function() {
+		$(win).one('load.blq', function() {
 		 	console.debug('window loaded');
 		 	// todo: optional callback/promise trigger!
 
@@ -95,7 +95,7 @@ blq.openWindow = function(url, title, options, optWin) {
 
 	// bind lifetime to parent window since this is almost always what we want
 	// todo: optional? (almost same a the "dependent" flag. though that flag seems only for very old firefox browser and to be deprecated..)
-	$(srcWin).one('unload._blq', function() {
+	$(srcWin).one('unload.blq', function() {
 		// don't think we need to check win.closed?
 		console.debug('closing child window: "%s"', url);
 		// todo: onClose(win); // hmm, perhaps allow callback to cancel close based on return val!?
