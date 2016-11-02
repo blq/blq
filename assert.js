@@ -9,7 +9,7 @@
  *
  */
 
-define([/*'polyfills/console'*/], function(/*console polyfill is not AMD*/) {
+define([], function() {
 
 	var assert = function(cond, optMsg) {
 		if (!cond) {
