@@ -4,7 +4,7 @@
  * @author Fredrik Blomqvist
  *
  */
-define(['blq/assert', 'jquery', 'dat/gui/GUI'], function(assert, $, GUI) {
+define(['blq/assert', 'jquery', 'dat/dat.gui'], function(assert, $, GUI) {
 
 /**
  * sets up a DAT GUI using a declarative json style config
