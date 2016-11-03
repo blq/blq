@@ -241,6 +241,7 @@ blq.queuePromises = function(fn) {
  *
  * todo: seems later require.js might actually return a Promise.
  * But still not in official released (2.3.2 at time of writing)
+ * @see https://github.com/requirejs/alameda/issues/8
  *
  * @param {!Array.<string>|string} scripts
  * @return {!Promise}
