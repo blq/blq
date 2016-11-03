@@ -1,12 +1,17 @@
 /**
+ * @fileoverview
+ * async helpers. For MochiKit, jQuery, and ES5 Promise etc
+ *
+ * todo: rename async.js?
+ * todo: bluebird stuff!
+ *
+ * @author Fredrik Blomqvist
  *
  */
 define(['blq/assert', 'jquery', 'polyfills/es6-promise', 'MochiKit/Async'], function(assert, $, _promise) {
 
 // namespace
 var blq = {};
-
-var bind = MochiKit.Base.bind;
 
 /**
  * @param {!(jQuery.Deferred|jQuery.Promise)} jd (just saying Promise is actually enough since Deferred inherits from it. but add both for clarity)
@@ -16,7 +21,7 @@ blq.jQueryDeferredToMochiKitDeferred = function(jd) {
 	assert(jd != null);
 
 	var md = new MochiKit.Async.Deferred();
-	jd.then(bind(md.callback, mk), bind(md.errback, md));
+	jd.then(md.callback.bind(md), md.errback.bind(md));
 	return md;
 };
 
@@ -29,9 +34,10 @@ blq.mochiKitDeferredTojQueryPromise = function(md) {
 	assert(md != null);
 
 	var jd = jQuery.Deferred();
-	md.addCallbacks(bind(jd.resolve, js), bind(jd.reject, jd));
+	md.addCallbacks(jd.resolve.bind(jd), jd.reject.bind(jd));
 	return jd.promise(); // could return jQuery.Deferred but no real use since MK.Deferred controls the trigger now!
 };
+
 
 /**
  * Experimental.
@@ -149,19 +155,21 @@ blq._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
  */
 blq.mochiKitDeferredToPromise = function(d) {
 	assert(d != null); // could use instanceof MK.Def ?
-	return new Promise(bind(d.addCallbacks, d));
+	return new Promise(d.addCallbacks.bind(d));
 };
 
+
 /**
- * @param {!Promise} p ES6 Promise
+ * @param {!Promise} p ES6 Promise todo: actually compatible with jQuery also ("thenable")
  * @return {!Deferred}
  */
 blq.promiseToMochiKitDeferred = function(p) {
 	assert(p != null);
 	var d = new MochiKit.Async.Deferred();
-	p.then(bind(d.callback, d), bind(d.errback, d));
+	p.then(d.callback.bind(d), d.errback.bind(d));
 	return d;
 };
+
 
 /**
  * wraps an async function(that returns a Promise) in a guard that doesn't issue a new
@@ -192,6 +200,7 @@ blq.lockPromiseCall = function(fn) {
 		return p;
 	};
 };
+
 
 /**
  * forces calls to an async function (returning a Promise) to
@@ -225,9 +234,14 @@ blq.queuePromises = function(fn) {
 	// };
 };
 
+
 /**
  * simple wrapper around requirejs call.
  * (assumes require.js is loaded)
+ *
+ * todo: seems later require.js might actually return a Promise.
+ * But still not in official released (2.3.2 at time of writing)
+ *
  * @param {!Array.<string>|string} scripts
  * @return {!Promise}
  */
