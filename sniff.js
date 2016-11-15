@@ -2,6 +2,8 @@
  * @fileoverview
  * Various detection and sniffing functions
  *
+ * @see http://caniuse.com/ for estimates of browser support. Once features reach maturity can drop more of stuff like this
+ *
  * @author Fredrik Blomqvist
  *
  */
@@ -81,6 +83,7 @@ sniff.hasCORS = function() {
 
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Geolocation
+ * observe that geolocation can still be turned off! @see sniff.canUseGeolocation
  * @return {boolean}
  */
 sniff.hasGeolocation = function() {
@@ -89,13 +92,32 @@ sniff.hasGeolocation = function() {
 };
 
 /**
- * todo: or change this method to tristate? maybe/pending state before user has agree or not?
- * @return {boolean}
+ * @return {!Promise}
  */
 sniff.canUseGeolocation = function() {
-	// todo: add permissions check also? (Permissions API is asynchronous though..)
-	// secure domain is new requirement in Chrome since v50
-	return sniff.hasGeolocation() && sniff.isSecureDomain();
+	// todo: cache result? (user can change her mind during a session?)
+	return new Promise(function(resolve, reject) {
+		// @see http://caniuse.com/#feat=permissions-api
+		if (typeof window.navigator.permissions != 'undefined') {
+			// todo: does this include secure domain check implicitly?
+			window.navigator.permissions.query({ name: 'geolocation' }).then(function(p) {
+				var supportsGeolocation = p.state !== 'denied';
+				// todo: hmm, or always resolve() but with true/false? what's more intuitive here?
+				if (supportsGeolocation) {
+					resolve();
+				} else {
+					reject();
+				}
+			});
+		} else {
+			// secure domain is new requirement in Chrome since v50
+			if (sniff.hasGeolocation() && sniff.isSecureDomain()) {
+				resolve();
+			} else {
+				reject();
+			}
+		}
+	});
 };
 
 
