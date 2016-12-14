@@ -25,25 +25,38 @@ var store = {
 	// todo: detection code? (private mode browsing. fallback to in-memory emulation?)
 	// store.enabled: boolean ?
 
+	// low-level get but without any default or checks
+	_get: function(key) {
+		return store.fromJSON(store.getRaw(key));
+	},
+
 	get: function(key, defaultVal) {
-		var val = store.fromJSON(store.getRaw(key));
+		// use has() to handle undefined case, but still let invalid JSON throw
+		// (neither localStorage.getItem nor JSON.parse returns undefined, only null)
+		var val = store.has(key) ? store._get(key) : undefined;
 		return val === undefined ? defaultVal : val;
 	},
 
 	/**
-	 * bypasses the json de-serializaton
+	 * bypasses JSON parsing
 	 */
 	getRaw: function(key) {
 		return localStorage.getItem(key);
 	},
 
 	set: function(key, value) {
+		if (value === undefined) {
+			// not so much as a shortcut for remove but
+			// to avoid 'undefined' entering LS at all. It's not consistent
+			store.remove(key);
+			return;
+		}
 		store.setRaw(key, store.toJSON(value));
 		return value; // chain
 	},
 
 	/**
-	 * bypasses the json serializaton
+	 * bypasses JSON serialization
 	 * @param {string} key
 	 * @param {*} value
 	 */
@@ -59,13 +72,9 @@ var store = {
 	 * @return chained
 	 */
 	transact: function(key, defaultVal, transactionFn) {
-		// overload on two vs three params
-		if (transactionFn == null) {
-			transactionFn = defaultVal;
-			defaultVal = null;
-		}
-		if (defaultVal == null) {
-			defaultVal = {};
+		if (arguments.length == 2) {
+			transactionFn = arguments[1];
+			defaultVal = undefined;
 		}
 		var val = store.get(key, defaultVal);
 		var ret = transactionFn(val);
@@ -82,7 +91,7 @@ var store = {
 	},
 
 	/**
-	 * cheaper than get(key) != null
+	 * cheaper than get(key) !== undefined
 	 * @param {string} key
 	 * @return {boolean}
 	 */
@@ -114,7 +123,7 @@ var store = {
 	getAll: function() {
 		var all = {};
 		store.each(function(key) {
-			all[key] = store.get(key);
+			all[key] = store._get(key); // use low-level _get since we know keys exist
 		});
 		return all;
 	}
@@ -142,7 +151,7 @@ if (typeof MochiKit != 'undefined' && typeof MochiKit.Iter != 'undefined') {
 				var key = localStorage.key(i--);
 				return {
 					key: key,
-					value: store.get(key)
+					value: store._get(key)
 				};
 			}
 		};
@@ -170,7 +179,7 @@ if (typeof Symbol == 'function' && typeof Symbol.iterator != 'undefined') {
 					done: false,
 					value: {
 						key: key,
-						value: store.get(key)
+						value: store._get(key)
 					}
 				};
 			}
