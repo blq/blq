@@ -47,7 +47,11 @@ var store = {
 	set: function(key, value) {
 		if (value === undefined) {
 			// not so much as a shortcut for remove but
-			// to avoid 'undefined' entering LS at all. It's not consistent
+			// to avoid 'undefined' entering LS at all.
+			// It's not consistent:
+			// localStorage.getItem(undefined) returns _null_.
+			// localStorage.setItem(undefined) stores a _string_ "undefined".
+			// JSON.parse("undefined") is invalid JSON.. => we never allow undefined!
 			store.remove(key);
 			return;
 		}
