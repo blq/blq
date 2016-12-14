@@ -1,7 +1,9 @@
 /**
  * @fileoverview
- * Initially used store.js https://github.com/marcuswestin/store.js/ but since we don't care about IE we just go for native now, API is inspired.
- * JSON encoding by default, use the '*Raw' fns otherwise.
+ * Initially used store.js https://github.com/marcuswestin/store.js/ but since we don't care about IE and
+ * we just go for native now, the API is inspired, though some twists, mainly iterators.
+ *
+ * JSON encoding used by default, use the '*Raw' fns otherwise.
  *
  * Exposes an ES6 iterator and MochiKit.Iterator if available.
  *
@@ -9,6 +11,7 @@
  * todo: namespaces? store.getNamespace(namespace) -> a store.get/set API but behind a namespace?!
  *
  * @author Fredrik Blomqvist
+ *
  */
 define([], function() {
 
@@ -18,13 +21,13 @@ var store = {
 	// replace if needed (typically if you need a reviver/replacer)
 	toJSON: JSON.stringify,
 	fromJSON: JSON.parse,
-	
+
 	// todo: detection code? (private mode browsing. fallback to in-memory emulation?)
 	// store.enabled: boolean ?
 
-	// todo: maybe optional 2nd fallback value arg?
-	get: function(key) {
-		return store.fromJSON(store.getRaw(key));
+	get: function(key, defaultVal) {
+		var val = store.fromJSON(store.getRaw(key));
+		return val === undefined ? defaultVal : val;
 	},
 
 	/**
@@ -47,6 +50,27 @@ var store = {
 	setRaw: function(key, value) {
 		localStorage.setItem(key, value);
 		return value; // chain
+	},
+
+	/**
+	 * @param {string} key
+	 * @param {*=} defaultVal value Or transaction function
+	 * @param {Function} transactionFn
+	 * @return chained
+	 */
+	transact: function(key, defaultVal, transactionFn) {
+		// overload on two vs three params
+		if (transactionFn == null) {
+			transactionFn = defaultVal;
+			defaultVal = null;
+		}
+		if (defaultVal == null) {
+			defaultVal = {};
+		}
+		var val = store.get(key, defaultVal);
+		var ret = transactionFn(val);
+		ret = ret === undefined ? val : ret;
+		return store.set(key, ret);
 	},
 
 	remove: function(key) {
@@ -76,7 +100,7 @@ var store = {
 		// ! always iterate backwards. Then both add and remove(of current elem) can be done by the callback in the loop.
 		for (var i = localStorage.length - 1; i >= 0; --i) {
 			var key = localStorage.key(i);
-			// todo: value? or do callback(key, val) or callback(val, key) ?
+			// todo: value? do callback(key, val)
 			var ret = callback(key);
 			if (ret === false)
 				break;
