@@ -35,6 +35,12 @@ var store = {
 		// (neither localStorage.getItem nor JSON.parse returns undefined, only null)
 		var val = store.has(key) ? store._get(key) : undefined;
 		return val === undefined ? defaultVal : val;
+
+		// easier? or more subtle anyway?
+//		if (store.has(key)) {
+//			return store._get(key);
+//		}
+//		return defaultVal;
 	},
 
 	/**
@@ -144,15 +150,21 @@ if (typeof MochiKit != 'undefined' && typeof MochiKit.Iter != 'undefined') {
 	// todo: hmm, or expose this as a store.enableMochKitIter? then a user can enable even if MK is loaded after this file.
 	// (maybe try something like this to set a "soft" dependency? http://stackoverflow.com/questions/14164610/requirejs-optional-dependency/27422370#27422370  hmm, still not quite. we want only opt-in if someone _else_ requires MK..)
 	store['__iterator__'] = function() {
-		// todo: hmm, maybe you could argue that the index in this case
-		// could/should be made to lazily initialize on the first next() call?
-		var i = localStorage.length - 1;
+		// use lazy init of the index on the very first next() call to match the behavior of a standard 0..N iterator.
+		// i.e we can grab an iterator (say empty collection), modify the collection, and still get consistent loop afterwards
+		var i = -1;
+		var first = true;
 		return {
 			next: function() {
+				if (first) {
+					i = localStorage.length - 1;
+					first = false;
+				}
 				if (i < 0) {
 					throw MochiKit.Iter.StopIteration;
 				}
 				var key = localStorage.key(i--);
+				// todo: or just return key as value? (similar to store.each)
 				return {
 					key: key,
 					value: store._get(key)
@@ -170,17 +182,23 @@ if (typeof Symbol == 'function' && typeof Symbol.iterator != 'undefined') {
 	// enables for example: for (let elem of store) { .. }
 	// @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
 	store[Symbol.iterator] = function() {
-		// todo: hmm, maybe you could argue that the index in this case
-		// could/should be made to lazily initialize on the very first next() call? (hmm, that would be case of starting from 0.. maybe need to change to that to be consistent then?)
-		var i = localStorage.length - 1;
+		// use lazy init of the index on the very first next() call to match behavior of a standard 0..N iterator.
+		// i.e we can grab an iterator (say empty collection), modify the collection, and still get consistent loop afterwards
+		var i = -1;
+		var first = true;
 		return {
 			next: function() {
+				if (first) {
+					i = localStorage.length - 1;
+					first = false;
+				}
 				if (i < 0) {
 					return { done: true };
 				}
 				var key = localStorage.key(i--);
 				return {
 					done: false,
+					// todo: or just return 'value: key'? (similar to store.each)
 					value: {
 						key: key,
 						value: store._get(key)
