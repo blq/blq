@@ -133,6 +133,7 @@ var store = {
 	getAll: function() {
 		var all = {};
 		store.each(function(key) {
+			// todo: make this a lazy property?
 			all[key] = store._get(key); // use low-level _get since we know keys exist
 		});
 		return all;
@@ -167,7 +168,12 @@ if (typeof MochiKit != 'undefined' && typeof MochiKit.Iter != 'undefined') {
 				// todo: or just return key as value? (similar to store.each)
 				return {
 					key: key,
-					value: store._get(key)
+					// use a property getter for lazy eval
+					get value() {
+						delete this.value;
+						return this.value = store._get(key);
+					}
+					// todo: expose setter? or too subtle?
 				};
 			}
 		};
@@ -198,10 +204,14 @@ if (typeof Symbol == 'function' && typeof Symbol.iterator != 'undefined') {
 				var key = localStorage.key(i--);
 				return {
 					done: false,
-					// todo: or just return 'value: key'? (similar to store.each)
 					value: {
 						key: key,
-						value: store._get(key)
+						// use a property getter for lazy eval
+						get value() {
+							delete this.value;
+							return this.value = store._get(key);
+						}
+						// todo: expose setter? or too subtle?
 					}
 				};
 			}
