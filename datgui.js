@@ -145,6 +145,7 @@ blq._refreshDatGUI = function(gui) {
  * removes extra margins and possible close button from the dat GUI to
  * make it smaller.
  * todo: rename? trimDatGUISize?
+ * todo: verify if still applicable in latest dat.GUI release (old code..)
  * @param {!Object} GUI class/namespace for the dat GUI
  * @param {!Object} gui instance of a dat GUI
  */
