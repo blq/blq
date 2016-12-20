@@ -91,6 +91,11 @@ navigator.mediaDevices.enumerateDevices()
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getUserMedia
  * returns only when the user actively has agreed on camera access!
  *
+ * observe that after use it's recommended to dipose the url using: URL.revokeObjectURL(url);
+ *
+ * todo: hmm, maybe blob url isn't necessary all the time?
+ * can maybe assign stream directly to <video>.srcObject ! @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/srcObject
+ *
  * @param {string} sourceId as obtained from blq._getMediaSources()
  * @return {!jQuery.Promise} string url
  */
