@@ -35,7 +35,7 @@ var blq = {};
  */
 blq.openWindow = function(url, title, options, optWin) {
 	// todo: perhaps help with transforming boolean->1/0 (or 'yes'/'no') ?
-	var winSettings = $.extend({
+	var winSettings = Object.assign({
 		width: 400,
 		height: 300,
 		// todo: set left/right to something close to the origin control?
