@@ -211,6 +211,13 @@ math.sinc = function(x) {
 	return Math.sin(x) / x;
 };
 
+// todo: use precomputed array?
+math.factorial = function(num) {
+    var rval=1;
+    for (var i = 2; i <= num; i++)
+        rval = rval * i;
+    return rval;
+};
 
 // debug export
 // window._math = math;
