@@ -4,9 +4,9 @@
  *
  */
 define([
-	'blq/assert', 
-	'jquery', 
-	'blq/dom', 
+	'blq/assert',
+	'jquery',
+	'blq/dom',
 	'blq/openwindow'
 ], function(assert, $, dom, openwin) {
 
@@ -159,31 +159,31 @@ media.getWebGLContex = function(canvas) {
 };
 
 
-/** 
+/**
  * grab video without inserting in document.
- * todo: Promise? (i.e wait for load & dimensions before ready?)
+ * todo: Promise? (i.e wait for load & dimensions before ready?) @see waitForVideoReady
  *
  * @param {string} src url (actually works for webcam url also)
  * @param {Object=} [options]
  * @return {!HTMLVideoElement} (not attached to the document)
  */
 media.loadVideo = function(src, options) {
-	options = $.extend({
+	options = Object.assign({
 		autoplay: false, // ! having this property is actually important for smoothness, specially for webcam (maybe bug in Chrome?)
 		muted: false,
-		loop: false	
+		loop: false
 	}, options);
-	
-	return $('<video>', $.extend(options, {
+
+	return $('<video>', Object.assign(options, {
 		src: src
 	})).get(0);
 };
 
 
-/** 
+/**
  * ? use when want the video to be fully ready (have dimensions)
  * typically wrap: waitForVideoReady(loadVideo('myvideo.mp4')).then(..)
- * 
+ *
  * @param {!HTMLVideoElement} video (yes, might already be playing)
  * @return {!Promise} video ready, defined as ensured to have dimensions (videoWidth, videoHeight)
  */
@@ -200,6 +200,47 @@ media.waitForVideoReady = function(video) {
 			});
 		}
 	});
+};
+
+
+/**
+ * @see https://webtorrent.io/
+ * @see https://github.com/feross/webtorrent
+ *
+ * @param {string} magnetURI torrentId
+ * @return {!Promise}
+ */
+media.getWebTorrentUrl = function(magnetURI) {
+	return new Promise(function(resolve, reject) {
+		// also dynamically load the js file. could load up-front but guess this is
+		// relatively uncommon use..
+		require(['webtorrent.min'], function(WebTorrent) {
+			var client = new WebTorrent();
+
+			client.on('error', function(err) {
+				// client.destroy(); // ?
+				reject(err);
+			});
+
+			client.add(magnetURI, function(torrent) {
+				// Torrents can contain many files. Let's use the first.
+				var file = torrent.files[0];
+				file.getBlobURL(function(err, url) {
+					if (err) {
+						console.error('Failed getting webtorrent blob url:', err);
+						reject(err);
+					} else {
+						resolve({
+							client: client,
+							torrent: torrent,
+							url: url
+						});
+					}
+				});
+			});
+
+		}, reject);
+	})
 };
 
 
