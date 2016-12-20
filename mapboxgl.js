@@ -4,7 +4,7 @@
  *
  * @see https://www.mapbox.com/mapbox-gl-js/api/
  * @see https://github.com/mapbox/mapbox-gl-js
- * At time of writing v0.26.0
+ * At time of writing v0.28.0
  *
  * @author Fredrik Blomqvist
  *
@@ -52,7 +52,7 @@ api.createMapBoxGL = function(container, center, opt) {
 		zoom: 11,
 		bearing: 0,
 		pitch: 0,
-		keyboard: false,		
+		keyboard: false,
 
 		showNavigation: true,
 		showGeolocation: true,
@@ -92,9 +92,11 @@ api.createMapBoxGL = function(container, center, opt) {
 		})
 		.then(function(map) {
 			return new Promise(function(resolve, reject) {
+				// necessary?
 				map.on('style.load', function() {
 					resolve(map);
 				});
+				// todo: timeout/error -> reject()
 			});
 		});
 };
