@@ -22,6 +22,10 @@ var store = {
 	toJSON: JSON.stringify,
 	fromJSON: JSON.parse,
 
+	// todo: expose swapping store so we
+	// can also use sessionStorage? https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+	_storage: localStorage,
+
 	// todo: detection code? (private mode browsing. fallback to in-memory emulation?)
 	// store.enabled: boolean ?
 
@@ -47,7 +51,7 @@ var store = {
 	 * bypasses JSON parsing
 	 */
 	getRaw: function(key) {
-		return localStorage.getItem(key);
+		return store._storage.getItem(key);
 	},
 
 	set: function(key, value) {
@@ -71,7 +75,7 @@ var store = {
 	 * @param {*} value
 	 */
 	setRaw: function(key, value) {
-		localStorage.setItem(key, value);
+		store._storage.setItem(key, value);
 		return value; // chain
 	},
 
@@ -93,11 +97,11 @@ var store = {
 	},
 
 	remove: function(key) {
-		localStorage.removeItem(key);
+		store._storage.removeItem(key);
 	},
 
 	clear: function() {
-		localStorage.clear();
+		store._storage.clear();
 	},
 
 	/**
@@ -107,7 +111,7 @@ var store = {
 	 */
 	has: function(key) {
 		// as said, only checks for existence of key (I think it's ok, but store.js checks value != undefined also for example)
-		return key in localStorage;
+		return key in store._storage;
 	},
 
 	// note that callback only gets the key id. Assumed to grab the value manually if needed.
@@ -117,8 +121,8 @@ var store = {
 	// -> or use the new ES6 iteration instead!
 	each: function(callback) {
 		// ! always iterate backwards. Then both add and remove(of current elem) can be done by the callback in the loop.
-		for (var i = localStorage.length - 1; i >= 0; --i) {
-			var key = localStorage.key(i);
+		for (var i = store._storage.length - 1; i >= 0; --i) {
+			var key = store._storage.key(i);
 			// todo: value? do callback(key, val)
 			var ret = callback(key);
 			if (ret === false)
@@ -158,13 +162,13 @@ if (typeof MochiKit != 'undefined' && typeof MochiKit.Iter != 'undefined') {
 		return {
 			next: function() {
 				if (first) {
-					i = localStorage.length - 1;
+					i = store._storage.length - 1;
 					first = false;
 				}
 				if (i < 0) {
 					throw MochiKit.Iter.StopIteration;
 				}
-				var key = localStorage.key(i--);
+				var key = store._storage.key(i--);
 				// todo: or just return key as value? (similar to store.each)
 				return {
 					key: key,
@@ -195,13 +199,13 @@ if (typeof Symbol == 'function' && typeof Symbol.iterator != 'undefined') {
 		return {
 			next: function() {
 				if (first) {
-					i = localStorage.length - 1;
+					i = store._storage.length - 1;
 					first = false;
 				}
 				if (i < 0) {
 					return { done: true };
 				}
-				var key = localStorage.key(i--);
+				var key = store._storage.key(i--);
 				return {
 					done: false,
 					value: {
