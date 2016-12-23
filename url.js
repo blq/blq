@@ -22,23 +22,46 @@ url.getLocationOrigin = function(win) {
 	return win.location.protocol + '//' + win.location.host; // (hostname doesn't include port number)
 };
 
+
+/**
+ * note: assumes running in a DOM-context
+ * @param {string} uri
+ * @return {!{url: string, protocol: string, hostname: string, port: integer, pathname: string, search: string, hash: string, host: string}}
+ */
+url.parseUrl = function(uri) {
+	// (re)use a cached <a> tag and let the browser do the job :)
+	var self = arguments.callee;
+	var a = self._a = self._a || document.createElement('a');
+	self._a.href = uri;
+
+	// return a plain object
+	return {
+		url: a.href,
+		protocol: a.protocol,
+		hostname: a.hostname,
+		port: parseInt(a.port || '80', 10), // even an explicit :80 in the url is ignored
+		pathname: a.pathname,
+		search: a.search,
+		hash: a.hash,
+		host: a.host // includes port
+	};
+};
+
+
 /**
  * note: assumes running in a DOM-context
  * @see http://davidwalsh.name/get-absolute-url
  *
- * @param {string} url
+ * @param {string} uri
  * @return {string}
  */
-url.getAbsoluteUrl = function(url) {
-	assert(typeof url == 'string');
+url.getAbsoluteUrl = function(uri) {
+	assert(typeof uri == 'string');
 	// assert(blq.isBrowser()); // ok?
 
-	// (re)use a cached <a> tag and let the browser do the job :)
-	var self = arguments.callee;
-	self._a = self._a || document.createElement('a');
-	self._a.href = url;
-	return self._a.href;
+	return url.parseUrl(uri).url;
 };
+
 
 /**
  * "NOP image", 1x1 8-bit GIF as a data URI.
