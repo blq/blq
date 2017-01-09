@@ -87,7 +87,7 @@ var throttle = function(fn, threshold) {
 		var self = this;
 		var args = arguments;
 
-		var now = (new Date()).getTime();
+		var now = Date.now();
 		if (last && now < last + threshold) {
 			// hold on to it
 			clearTimeout(deferTimer);
@@ -107,6 +107,8 @@ var throttle = function(fn, threshold) {
 			deferTimer = null;
 		}
 	};
+
+	// todo expose a fn.throttle(ms) (name? fn.threshold(ms)?) to change time?
 
 	return _throttled;
 };

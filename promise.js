@@ -1,6 +1,6 @@
 /**
  * @fileoverview
- * async helpers. For MochiKit, jQuery, and ES5 Promise etc
+ * async helpers. For MochiKit, jQuery, and ES6 Promise etc
  *
  * todo: rename async.js?
  * todo: drop the Promise-polyfill? all relevant platforms support it ok now
