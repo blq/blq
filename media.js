@@ -171,9 +171,15 @@ media.loadVideo = function(src, options) {
 	options = Object.assign({
 		autoplay: false, // ! having this property is actually important for smoothness, specially for webcam (maybe bug in Chrome?)
 		muted: false,
-		loop: false
+		loop: false,
+		controls: false
 	}, options);
-
+	
+	// "controls" is a not a boolean attribute. If exists at all implies true
+	if (!options.controls) {
+		delete options.controls;
+	}
+		
 	return $('<video>', Object.assign(options, {
 		src: src
 	})).get(0);
