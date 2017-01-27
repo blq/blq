@@ -169,7 +169,9 @@ worker.makeFnWorkerAsync = function(fn) {
 			delete d.worker;
 			// ! 'err' will not be same error as the worker threw.
 			// Workers can't return or propagate Error() objs, thus we re-wrap it.
-			d.errback(new Error(err));
+			// (MK.Deferred always wraps errback anyway though (but not ES6 Promise))
+		//	d.errback(new Error(err));
+			d.errback(err);
 		};
 		// can't post the 'arguments' object
 		d.worker.postMessage(Array.prototype.slice.call(arguments));
@@ -199,6 +201,7 @@ worker.makeFnWorkerPromise = function(fn) {
 		return new Promise(function(resolve, reject) {
 			var w = new Worker(workerUrl);
 			this.worker = w; // expose to caller. ok?
+
 			w.onmessage = function(e) {
 				w.terminate();
 				resolve(e.data);
