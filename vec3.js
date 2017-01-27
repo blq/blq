@@ -1,6 +1,7 @@
 
 define([], function() {
 
+/** @constructor */
 function Vec3(x, y, z) {
 	this.x = x;
 	this.y = y;
