@@ -80,7 +80,7 @@ blq._bindDatGUI = function(gui, decl, params) {
 	$.each(decl, function(i, p) {
 		var val = p.value;
 		var ctrl = null;
-		if ($.isArray(val)) {
+		if (Array.isArray(val)) {
 			params[p.id] = p.value[0]; // grab first
 			ctrl = gui.add(params, p.id, p.value);
 		} else
@@ -126,7 +126,7 @@ blq._bindDatGUI = function(gui, decl, params) {
  */
 blq._refreshDatGUI = function(gui) {
 	assert(gui != null);
-	assert($.isArray(gui.__controllers));
+	assert(Array.isArray(gui.__controllers));
 	assert(typeof gui.__folders == 'object');
 
 	// @see http://workshop.chromeexperiments.com/examples/gui/#10--Updating-the-Display-Manually
@@ -153,9 +153,9 @@ blq._trimGUISize = function(GUI, gui) {
 	assert(GUI != null);
 	assert(gui != null);
 
-	$('.' + GUI.CLASS_CLOSE_BUTTON, gui.domElement).remove();
+	$(gui.domElement).find('.' + GUI.CLASS_CLOSE_BUTTON).remove();
 	$(gui.domElement).css('margin-right', 0);
-	$('.save-row', gui.domElement).addClass('float-right');
+	$(gui.domElement).find('.save-row').addClass('float-right');
 };
 
 return blq;
