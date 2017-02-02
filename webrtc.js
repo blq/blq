@@ -5,7 +5,7 @@
  * @author Fredrik Blomqvist
  *
  */
-define(['blq/assert', 'jquery'], function(assert, $) {
+define(['blq/assert'], function(assert) {
 
 // namespace
 var media = {};
@@ -28,61 +28,61 @@ media.polyfill.enableGetUserMedia = function() {
  * @see https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack
  *
  * splits the types into three lists: cameras, microphones and other
- * @return {!jQuery.Promise} Array.<!{ cameras: !Array.<!Object>, microphones: !Array.<!Object>, other: !Array.<!Object> }>
+ * @return {!Promise} Array.<!{ cameras: !Array.<!Object>, microphones: !Array.<!Object>, other: !Array.<!Object> }>
  */
-media._getMediaSources = function() {
-	var d = $.Deferred();
+media._getMediaSources = function() {	
+	return new Promise(function(resolve, reject) {		
+		if (typeof MediaStreamTrack == 'undefined' || typeof MediaStreamTrack.getSources == 'undefined') {
+			var msg = 'MediaStreamTrack not supported';
+			console.warn(msg);
+			reject(msg);
+			return;
+		}
 
-	if (typeof MediaStreamTrack == 'undefined' || typeof MediaStreamTrack.getSources == 'undefined') {
-		var msg = 'MediaStreamTrack not supported';
-		console.warn(msg);
-		return d.reject(msg).promise();
-	}
-
-	// todo: can this be slow? (could use d.notify() per source!)
-	// todo: cache this?
-	// todo: Chrome says this is deprecated? use: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices
-/*
-navigator.mediaDevices.enumerateDevices()
-.then(function(devices) {
-  devices.forEach(function(device) {
-    console.log(device.kind + ": " + device.label +
-                " id = " + device.deviceId);
-  });
-})
-.catch(function(err) {
-  console.log(err.name + ": " + error.message);
-});
-*/
-	MediaStreamTrack.getSources(function(sources) {
-		var cams = [];
-		var mics = [];
-		var other = [];
-
-		sources.forEach(function(source) {
-			if (source.kind == 'video') {
-				// camera.facing is always "" on my laptop, but apparently can/should be "environment" or "user" (mobiles)
-				// dump some debug
-				if (source.facing != '')
-					console.debug('video/camera facing:', source.facing);
-
-				cams.push(source);
-			} else
-			if (source.kind == 'audio') {
-				mics.push(source);
-			} else {
-				other.push(source);
-			}
+		// todo: can this be slow? (could use d.notify() per source!)
+		// todo: cache this?
+		// todo: Chrome says this is deprecated? use: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices
+		/*
+		navigator.mediaDevices.enumerateDevices()
+		.then(function(devices) {
+		  devices.forEach(function(device) {
+			console.log(device.kind + ": " + device.label +
+						" id = " + device.deviceId);
+		  });
+		})
+		.catch(function(err) {
+		  console.log(err.name + ": " + error.message);
 		});
+		*/
+	
+		MediaStreamTrack.getSources(function(sources) {
+			var cams = [];
+			var mics = [];
+			var other = [];
 
-		d.resolve({
-			cameras: cams,
-			microphones: mics,
-			other: other
-		});
+			sources.forEach(function(source) {
+				if (source.kind == 'video') {
+					// camera.facing is always "" on my laptop, but apparently can/should be "environment" or "user" (mobiles)
+					// dump some debug
+					if (source.facing != '')
+						console.debug('video/camera facing:', source.facing);
+
+					cams.push(source);
+				} else
+				if (source.kind == 'audio') {
+					mics.push(source);
+				} else {
+					other.push(source);
+				}
+			});
+
+			resolve({
+				cameras: cams,
+				microphones: mics,
+				other: other
+			});
+		});		
 	});
-
-	return d.promise();
 };
 
 
@@ -97,7 +97,7 @@ navigator.mediaDevices.enumerateDevices()
  * can maybe assign stream directly to <video>.srcObject ! @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/srcObject
  *
  * @param {string} sourceId as obtained from blq._getMediaSources()
- * @return {!jQuery.Promise} string url
+ * @return {!Promise} string url
  */
 media._getVideoUrl = function(sourceId) {
 	assert(typeof sourceId == 'string');
@@ -115,19 +115,19 @@ media._getVideoUrl = function(sourceId) {
 		}
 	};
 
-	var d = $.Deferred();
-	navigator.getUserMedia(constraints,
-	// MediaDevices.getUserMedia(constraints, // ?
-		function(stream) {
-			var videoUrl = window.URL.createObjectURL(stream);
-			d.resolve(videoUrl);
-		},
-		function(error) {
-			console.error('navigator.getUserMedia fail:', error);
-			d.reject(error);
-		}
-	);
-	return d.promise();
+	return new Promise(function(resolve, reject) {
+		navigator.getUserMedia(constraints,
+		// MediaDevices.getUserMedia(constraints, // ?
+			function(stream) {
+				var videoUrl = window.URL.createObjectURL(stream);
+				resolve(videoUrl);
+			},
+			function(error) {
+				console.error('navigator.getUserMedia fail:', error);
+				reject(error);
+			}
+		);
+	});
 };
 
 
