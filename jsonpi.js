@@ -21,7 +21,7 @@ jsonpi.callJSONPI = function(url, params, options) {
 	assert(typeof url == 'string');
 	params = params || {};
 
-	options = $.extend({
+	options = Object.assign({
 		method: 'GET', // or 'POST'
 		parseResponse: JSON.parse // todo: or allow a more "brutal" eval() ?
 	}, options);
@@ -29,7 +29,7 @@ jsonpi.callJSONPI = function(url, params, options) {
 	var name = '__blq_jsonpi_' + util.getUid();
 
 	return new Promise(function(resolve, reject) {
-		
+
 		var iframe = $('<iframe>', {
 			name: name,
 			width: 0, height: 0,
@@ -56,7 +56,7 @@ jsonpi.callJSONPI = function(url, params, options) {
 
 		form.append(iframe); // can be in anywhere in document but nice to keep local
 		$('body').append(form);
-		
+
 		// todo: if always XSS block we need to change to always succeed I guess.. :(
 		iframe.on('load', function() {
 			try {
@@ -71,10 +71,10 @@ jsonpi.callJSONPI = function(url, params, options) {
 				reject(ex);
 			}
 			finally {
-				form.remove(); // cleanup	
-			}			
+				form.remove(); // cleanup
+			}
 		});
-		
+
 		form.submit();
 	});
 };

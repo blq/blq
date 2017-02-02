@@ -1,7 +1,7 @@
 /**
  *
  */
-define(['blq/assert', 'jquery', 'MochiKit/Text'], function(assert, $) {
+define(['blq/assert', 'MochiKit/Text'], function(assert) {
 
 // namespace
 var street = {};
@@ -20,7 +20,7 @@ street.getStreetviewImageCubeUrls = function(latlng, options) {
 	assert(blq.isLatLngLike(latlng));
 
 	// todo: more options, map key, initial angle etc
-	options = $.extend({
+	options = Object.assign({
 		size: 256 // supports {w, h} also
 	}, options);
 

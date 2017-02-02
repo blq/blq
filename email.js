@@ -1,7 +1,7 @@
 /**
  * @author Fredrik Blomqvist
  */
-define(['jquery', 'MochiKit/Text'], function($) {
+define(['MochiKit/Text'], function() {
 
 // namespace
 var mail = {};
@@ -15,7 +15,7 @@ var mail = {};
  * todo: hmm, tel: skype: etc might be similar I guess?
  *
  * todo: would "attachment" work? (not standard?)
- * 
+ *
  * @param {string|{email: string=, cc: string=, bcc: string=, subject: string=, body: string=}} email  multiple mails can be comma separated. all fields are optional.
  * @param {string=} [subject]
  * @param {string=} [body] can include newlines (multiple blank newlines seems to collapse to just one in at least my mail prog)
@@ -25,7 +25,7 @@ mail.createEmailUrl = function(email, subject, body) {
 	// handle overloading
 	var arg = null;
 	if (arguments.length == 1 && typeof arguments[0] == 'object') {
-		arg = $.extend({}, arguments[0]); // clone so we don't modify input
+		arg = Object.assign({}, arguments[0]); // clone so we don't modify input
 	} else {
 		arg = {
 			email: email,

@@ -45,7 +45,7 @@ api.loadMapBoxScript = function() { // or just loadScript() ?
  * @return {!Promise} map instance
  */
 api.createMapBoxGL = function(container, center, opt) {
-	opt = $.extend({
+	opt = Object.assign({
 		accessToken: null,
 
 		style: 'mapbox://styles/mapbox/streets-v9', // 'mapbox://styles/mapbox/dark-v9' // todo: can append "&optimize=true"

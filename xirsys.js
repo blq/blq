@@ -65,7 +65,7 @@ xirsys._validateXirSysParams = function(params) {
 xirsys.getXirSysIceServerAuth = function(params) {
 	assert(params != null);
 
-	params = $.extend({
+	params = Object.assign({
 		// let these fallback to the most common defaults
 		application: 'default',
 		room: 'default'

@@ -30,6 +30,7 @@ notif.enableNotifications = function(element, callback) {
 	if (typeof Notification == 'undefined') // == 'function'?
 		callback('unavailable');
 	// todo: should be possible with other user-triggered events also. expose in options?
+	// todo: drop jQuery dependency here and simply use addEventListener?
 	$(element).on('click.blq_notification_permission', function() {
 		Notification.requestPermission(callback);
 	});
@@ -55,7 +56,7 @@ notif.showNotification = function(title, body, options) {
 
 	options = options || {};
 	// todo: try-catch? wrap to a fallback?
-	return new Notification(title, $.extend({
+	return new Notification(title, Object.assign({
 		body: body
 	}, options));
 };

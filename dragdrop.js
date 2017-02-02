@@ -46,7 +46,7 @@ blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
 	progress = progress || jQuery.noop;
 	assert(typeof progress == 'function');
 
-	options = $.extend({
+	options = Object.assign({
 		output: reader.ReadFileFormat.Base64,
 		// if true the result will always be an array.
 		allowMultiple: false,
@@ -129,19 +129,11 @@ blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
 		// todo: or simply always use array?
 		if (options.allowMultiple) {
 
-			var deferreds = MochiKit.Base.map(function(file) {
+			var promises = files.map(function(file) {
 				return reader.readFile(file, options);
-			}, files);
+			});
 
-			// todo: sigh, why doesn't jQuery have a gatherResults or similar!?
-			$.when.apply($, deferreds).then(
-				function() {
-					// convert arguments into real list
-					callback(MochiKit.Base.extend([], arguments));
-				},
-				errback,
-				progress
-			);
+			Promise.all(promises).then(callback, errback);
 
 		} else {
 			var file = files[0];
