@@ -10,7 +10,10 @@ define([
 var api = {};
 
 
-//(wrap in factory to avoid load-time dep on THREE)
+/** 
+ * (wrapped in factory to avoid load-time dep on THREE)
+ * @return {!THREE.Texture}
+ */
 api.getDummyTexture = function() {
 	/**
 	 * minimal black texture, typically to be used as a intermittent placeholder during swaps.
@@ -44,16 +47,19 @@ api.getDummyTexture = function() {
  * for use when you want the real load/err confirmation
  * todo: hmm, or use dummy-texture-pattern instead? (and by synchronous)
  * @param {string} url
+ * @param {Function=} opt_progress
  * @return {!Promise}
  */
-api.loadTexture = function(url) {
+api.loadTexture = function(url, opt_progress) {
 	return new Promise(function(resolve, reject) {
 		var loader = new THREE.TextureLoader(); // todo: should we bother caching this?
 		var texture = loader.load(url,
 			function onload() {
 				resolve(texture);
 			},
-			function onprogress_nop() {},
+			function onprogress() {
+				if (opt_progress) opt_progress.apply(this, arguments);
+			},
 			function onerror(err) {
 				reject(err);
 			}
