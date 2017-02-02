@@ -18,7 +18,7 @@ var css = {}
  *
  * @param {string} url 	todo: support an array?
  * @param {string=} [id]
- * @return {!jQuery.Promise} observe that this callback only specifies when the CSS is loaded by Ajax, Not when it's fully active in the document..
+ * @return {!Promise} observe that this callback only specifies when the CSS is loaded by Ajax, Not when it's fully active in the document..
  */
 css.loadCSS = function(url, id) {
 	assert(typeof url == 'string');
@@ -40,21 +40,21 @@ css.loadCSS = function(url, id) {
 */
 
 	// better? this enables cross-domain but with no real error-callback..
-	var d = $.Deferred();
-	var link = $('<link>', {
-		href: url,
-		id: id, // todo: generate a default id if not supplied?
-		rel: 'stylesheet',
-		type: 'text/css',
-		media: 'screen', // necessary? or'all'?
-		// event
-		load: function(e) {
-			d.resolve(this);
-		}
-		// todo: since no error event might need a timeout wrapper I guess? OR.. combine this event with the xhr stuff? (then we can catch 404 etc)
+	return new Promise(function(resolve, reject) {
+		var link = $('<link>', {
+			href: url,
+			id: id, // todo: generate a default id if not supplied?
+			rel: 'stylesheet',
+			type: 'text/css',
+			media: 'screen', // necessary? or'all'?
+			// event
+			load: function(e) {
+				resolve(this);
+			}
+			// todo: since no error event might need a timeout wrapper I guess? OR.. combine this event with the xhr stuff? (then we can catch 404 etc)
+		});
+		$('head').append(link);
 	});
-	$('head').append(link);
-	return d.promise();
 };
 
 /*
@@ -172,7 +172,7 @@ css.cssPolyline = function(vertices, opt) {
 	assert(vertices != null); // todo: iterable/array check
 
 	// todo: extend attributes also
-	opt = $.extend({
+	opt = Object.assign({
 		'class': '',
 		css: {}
 	}, opt);
