@@ -211,7 +211,11 @@ math.sinc = function(x) {
 	return Math.sin(x) / x;
 };
 
-// todo: use precomputed array?
+/**
+ * todo: use precomputed array?
+ * @param {number} num
+ * @return {number} == num!
+ */
 math.factorial = function(num) {
     var rval=1;
     for (var i = 2; i <= num; i++)

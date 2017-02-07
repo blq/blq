@@ -66,7 +66,7 @@ blq._parseGoogleSpreadsheetJson = function(json, columns) {
  * retrieve a publicly shared Google Spreadsheet (via JSONP)
  * @see blq._parseGoogleSpreadSheetJson()
  * todo: hmm, or should take column specs here directly. a public fn shouldn't need to parse as separate step..
- * todo: overload so you can simply pass an enture spreadsheet url for simplcity?
+ * todo: overload so you can simply pass an entire spreadsheet url for simplicity?
  *
  * @param {string} docId  (this is the key you see in the url of your spreadsheet)
  * @param {string=} [wsId=1]
@@ -94,7 +94,7 @@ blq.postToGoogleFormSpreadSheet = function(formId, entries) {
 	assert(typeof formId == 'string');
 	assert(entries != null); // todo: or allow empty?
 
-	// copy entries to new object (don't want to modifie input data)
+	// copy entries to new object (don't want to modifiy input data)
 	// and prefix names with "entry." for convenience (ok? always true?)
 	var params = {};
 	for (var name in entries) {

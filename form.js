@@ -5,7 +5,7 @@
  * @author Fredrik Blomqvist
  *
  */
- 
+
 define(['blq/assert', 'jquery', 'jquery.serialize-object'], function(assert, $) {
 
 // namespace
@@ -77,9 +77,10 @@ form.onSubmitJSON = function(formSelector, callback, block) {
  * @param {boolean=} [enable]
  */
 form.toggleForm = function(form, enable) {
+	form = $(form);
 	// todo: handle actual toogle by reading state?
-	$(form).find(':input, [type=submit]').prop('disabled', !enable);
-	// todo: return form or new state?
+	form.find(':input, [type=submit]').prop('disabled', !enable);
+	// todo: return form or new state?	
 };
 
 form.disableForm = function(form) {
