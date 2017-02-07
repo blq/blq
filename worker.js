@@ -185,7 +185,7 @@ worker.makeFnWorkerAsync = function(fn) {
  * otherwise same as makeFnWorkerAsync.
  *
  * @param {function()) fn
- * @return {function(): !Promise} Promise will have '.worker' as a property
+ * @return {function(): !Promise} //Promise will have '.worker' as a property
  */
 worker.makeFnWorkerPromise = function(fn) {
 	assert(typeof fn == 'function');
@@ -198,9 +198,9 @@ worker.makeFnWorkerPromise = function(fn) {
 
 	return function(/*args*/) {
 		var args = Array.prototype.slice.call(arguments); // can't post the raw 'arguments' object
-		return new Promise(function(resolve, reject) {
+		var promise = new Promise(function(resolve, reject) {
 			var w = new Worker(workerUrl);
-			this.worker = w; // expose to caller. ok?
+			promise.worker = w; // expose to caller. ok? ('this' is not the Promise but the global scope here)
 
 			w.onmessage = function(e) {
 				w.terminate();
@@ -215,6 +215,7 @@ worker.makeFnWorkerPromise = function(fn) {
 			};
 			w.postMessage(args);
 		});
+		return promise;
 	};
 };
 
