@@ -1,7 +1,12 @@
 /**
+ * @fileoverview
+ * URL utilities
+ *
+ * todo: switch to new URL API
+ *	https://developer.mozilla.org/en-US/docs/Web/API/URL
+ *	http://caniuse.com/#feat=url
  *
  * @author Fredrik Blomqvist
- *
  */
 define(['blq/assert'], function(assert) {
 
@@ -29,6 +34,8 @@ url.getLocationOrigin = function(win) {
  * @return {!{url: string, protocol: string, hostname: string, port: integer, pathname: string, search: string, hash: string, host: string}}
  */
 url.parseUrl = function(uri) {
+//	todo: return new URL(uri); // !
+
 	// (re)use a cached <a> tag and let the browser do the job :)
 	var self = arguments.callee;
 	var a = self._a = self._a || document.createElement('a');
