@@ -185,7 +185,7 @@ worker.makeFnWorkerAsync = function(fn) {
  * otherwise same as makeFnWorkerAsync.
  *
  * @param {function()) fn
- * @return {function(): !Promise} //Promise will have '.worker' as a property
+ * @return {function(): !Promise} Promise will have '.worker' as a property
  */
 worker.makeFnWorkerPromise = function(fn) {
 	assert(typeof fn == 'function');
