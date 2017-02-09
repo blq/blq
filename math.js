@@ -1,12 +1,15 @@
 /**
- * @author Fredrik Blomqvist
- *
  * @fileoverview
  * Math functions
+ * todo: use ES6 Math @see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Math
+ *
+ * @author Fredrik Blomqvist
  *
  */
 
 define([], function() {
+
+'use strict';
 
 /**
  * exported api
@@ -111,6 +114,7 @@ math.logN = function(val, base) { // or swap param order?  (logb, logB?)
 };
 
 /**
+ * @deprecated use Math.log2()
  * @param {number} val
  * @return {number}
  */
@@ -119,6 +123,7 @@ math.log2 = function(val) {
 };
 
 /**
+ * @deprecated use Math.log10()
  * alias base 10, just for readability.
  * @param {number} val
  * @return {number}
@@ -142,6 +147,7 @@ math.lerp = function(a, b, t) {
 
 
 /**
+ * @deprecated use Math.sign()
  * @param {number} v
  * @return {integer} -1, +1
  */
@@ -171,9 +177,10 @@ math.ceilMag = function(v) {
 };
 
 /**
+ * @deprecated use Math.trun()
  * rounds towards zero, regardless of sign (based on magnitude).
  *
- * @see math.ceilMag for rounding aways fom zero.
+ * @see math.ceilMag for rounding away fom zero.
  *
  * Please note that floating point doesn't behave "perfectly". you *will* get minor differences..
  *
@@ -194,7 +201,7 @@ math.trunc = function(v) {
  * (yes, there's emulation tricks for this (also via strings!) but we don't use them!)
  *
  * @param {number} v
- * @return {number} v
+ * @return {number} >= 0
  */
 math.frac = function(v) {
 	return Math.abs(v - math.trunc(v));
@@ -217,8 +224,8 @@ math.sinc = function(x) {
  * @return {number} == num!
  */
 math.factorial = function(num) {
-    var rval=1;
-    for (var i = 2; i <= num; i++)
+    var rval = 1;
+    for (var i = 2; i <= num; ++i)
         rval = rval * i;
     return rval;
 };
