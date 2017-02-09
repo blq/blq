@@ -7,6 +7,8 @@
  */
 define([], function() {
 
+'use strict';
+
 var api = {};
 
 /**
@@ -20,13 +22,15 @@ api.loadGoogleMaps = function(key) {
 		// must sniff also since we're using the API-ready callback and not the requirejs log.
 		// todo: ..still not 100%. calling this during pending (i.e before the API-ready is a race)
 		// -> must basically keep our own registry of pending and loaded google urls..
+		// todo: hmm, could maybe use our 'lockPromiseCall'? (@see promise.js)
 		if (typeof google != 'undefined' && typeof google.maps != 'undefined') {
 			resolve(google.maps);
 			return;
 		}
 
-		// todo: generate a UID? (or not? don't want to load twice even if race?)
-		window._blq_googleMapsReady = function() {
+ 		// global API-ready "jsonp" style callback
+		// todo: generate as a GUID? (or not? don't want to load twice even if race?)
+		window['_blq_googleMapsReady'] = function() {
 			delete window._blq_googleMapsReady;
 			console.log('Google Maps v:', google.maps.version, 'loaded');
 			resolve(google.maps);
