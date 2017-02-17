@@ -16,7 +16,7 @@ var finance = {
  todo: the values could be "refined" to more fitting types. now always strings it seems.. -> store name + type propagator fn?
  @see https://www.quora.com/What-do-the-following-attributes-returned-in-a-JSON-array-from-the-Google-Finance-API-mean
  @see http://www.quantatrisk.com/2015/05/07/hacking-google-finance-in-pre-market-trading-python/
- 
+
 // example return (Alibaba stock):
 {
 	c: "-1.02",
@@ -55,17 +55,17 @@ finance._keyToFullName = {
 
 /**
  * @param {string|Array.<string>} symbol
- * @return {!jQuery.Promise} Array if input was an array
+ * @return {!Promise} Array if input was an array
  */
 finance.getStockQuote = function(symbol) {
 	var symbols = typeof symbol == 'string' ? symbol : symbol.join(',');
 
-	return $.ajax(finance.url, {
+	return Promise.resolve($.ajax(finance.url, {
 		data: {
 			client: 'ig', // ? seems to work without
 			q: symbols
 		}
-	})
+	}))
 	.then(function(ret) {
 		// remove odd blocker comment prefix
 		var json = ret.replace('//', '');

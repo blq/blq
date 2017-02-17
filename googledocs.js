@@ -70,7 +70,7 @@ blq._parseGoogleSpreadsheetJson = function(json, columns) {
  *
  * @param {string} docId  (this is the key you see in the url of your spreadsheet)
  * @param {string=} [wsId=1]
- * @return {!jQuery.Promise} typically feed result to blq._parseGoogleSpreadSheetJson()
+ * @return {!Promise} typically feed result to blq._parseGoogleSpreadSheetJson()
  */
 blq.getGoogleSpreadsheet = function(docId, wsId) {
 	assert(docId != null);
@@ -78,10 +78,10 @@ blq.getGoogleSpreadsheet = function(docId, wsId) {
 	wsId = wsId || '1'; // or 'od6'??
 	// @see https://developers.google.com/gdata/samples/spreadsheet_sample
 	// @see https://developers.google.com/gdata/docs/json
-	return $.ajax('https://spreadsheets.google.com/feeds/list/' + docId +'/'+ wsId + '/public/values', {
+	return Promise.resolve($.ajax('https://spreadsheets.google.com/feeds/list/' + docId +'/'+ wsId + '/public/values', {
 		data: { alt: 'json-in-script' },
 		dataType: 'jsonp'
-	});
+	}));
 };
 
 

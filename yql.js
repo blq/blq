@@ -17,19 +17,19 @@ var yql = {
 
 /**
  * @param {string} query
- * @return {!jQuery.Promise}
+ * @return {!Promise}
  */
 yql.query = function(query) {
 	assert(query != null);
 
-	return $.ajax(yql.url, {
+	return Promise.resolve($.ajax(yql.url, {
 		data: {
 			q: query,
 			format: 'json',
 			diagnostics: true,
 			env: yql._env
 		}
-	});
+	}));
 };
 
 
@@ -39,7 +39,7 @@ yql.query = function(query) {
  * @see http://www.datatables.org/
  *
  * @param {string|!Array.<string>} stocks
- * @return {!jQuery.Promise}
+ * @return {!Promise}
  */
 yql.getCurrentStockQuote = function(stocks) {
 	assert(stocks != null);
@@ -56,7 +56,7 @@ yql.getCurrentStockQuote = function(stocks) {
  * @param {string|!Array.<string>} stocks
  * @param {!Date} startDate (or take a time-interval instead?) todo: overload on a plain iso-like (sub)string also? "2014"?
  * @param {!Date=} [endDate=now]
- * @return {!jQuery.Promise}
+ * @return {!Promise}
  */
 yql.getHistoricalStockData = function(stocks, startDate, endDate) {
 	assert(stocks != null);

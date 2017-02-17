@@ -1,7 +1,7 @@
 /**
  * @fileoverview
  * hmm, freebase is dead now.. :(
- *  
+ *
  */
 define(['assert', 'jquery'], function(assert, $) {
 
@@ -22,17 +22,17 @@ var freebase = {
  * todo/note: this is not MQL (needs oauth)
  * @param {string} query
  * ..
- * @return {!jQuery.Promise}
+ * @return {!Promise}
  */
 freebase.query = function(query, options) {
 	assert(query != null);
 
-	return $.ajax(freebase.url, {
+	return Promise.resolve($.ajax(freebase.url, {
 		data: {
 			query: query,
 			key: freebase.api_key
 		}
-	});
+	}));
 };
 
 
