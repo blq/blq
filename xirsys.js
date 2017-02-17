@@ -60,7 +60,7 @@ xirsys._validateXirSysParams = function(params) {
  * @see https://xirsys.com/ sign up
  *
  * @param {!{ identity: string, domain: string, secret: string, application: string=, room: string= }} params
- * @return {!jQuery.Promise} auth config data (ice-servers etc). Can be passed directly to Peer.js constructor's 'config' arg.
+ * @return {!Promise} auth config data (ice-servers etc). Can be passed directly to Peer.js constructor's 'config' arg.
  */
 xirsys.getXirSysIceServerAuth = function(params) {
 	assert(params != null);
@@ -74,12 +74,12 @@ xirsys.getXirSysIceServerAuth = function(params) {
 	// (XirSys is CORS (XSS) enabled)
  	// @see http://xirsys.com/peerjs/
 	// todo: can we cache this? (localStorage) hmm, No! XirSys says 10 seconds(!?)
-	return $.Deferred().resolve()
+	return Promise.resolve()
 		.then(function() {
 			xirsys._validateXirSysParams(params);
 		})
 		.then(function() {
-			return $.ajax({
+			return Promise.resolve($.ajax({
 				url: 'https://service.xirsys.com/ice',
 				data: {
 					ident: params.identity,
@@ -89,16 +89,14 @@ xirsys.getXirSysIceServerAuth = function(params) {
 					secret: params.secret,
 					secure: 1
 				}
-			});
+			}));
 		})
 		.then(function(ret) {
 			return ret.d; // == itemgetter('d')
-		})
-		// .resolve() // start
-		.promise();
+		});
 
 
-	// return $.ajax({
+	// return Promise.resolve($.ajax({
 	// 	url: 'https://service.xirsys.com/ice',
 	// 	data: {
 	// 		ident: params.identity,
@@ -110,7 +108,7 @@ xirsys.getXirSysIceServerAuth = function(params) {
 	// 	}
 	// }).then(function(data) {
 	// 	return data.d; // fwd only the actual config stuff
-	// });
+	// }));
 };
 
 return xirsys;
