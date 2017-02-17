@@ -118,7 +118,7 @@ math.logN = function(val, base) { // or swap param order?  (logb, logB?)
  * @param {number} val
  * @return {number}
  */
-math.log2 = function(val) {
+math.log2 = Math.log2 || function(val) {
 	return Math.log(val) / Math.LN2;
 };
 
@@ -128,7 +128,7 @@ math.log2 = function(val) {
  * @param {number} val
  * @return {number}
  */
-math.log10 = function(val) {
+math.log10 = Math.log10 || function(val) {
 	return math.logN(val, 10);
 };
 
@@ -151,7 +151,7 @@ math.lerp = function(a, b, t) {
  * @param {number} v
  * @return {integer} -1, +1
  */
-math.sign = function(v) {
+math.sign = Math.sign || function(v) {
 	return v < 0 ? -1 : 1;
 };
 
@@ -187,7 +187,7 @@ math.ceilMag = function(v) {
  * @param {number} v
  * @return {number}
  */
-math.trunc = function(v) {
+math.trunc = Math.trunc || function(v) {
 	return v < 0 ? Math.ceil(v) : Math.floor(v);
 };
 
