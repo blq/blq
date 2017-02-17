@@ -8,6 +8,8 @@
  */
 define([], function() {
 
+'use strict';
+
 // namespace
 var vib = {};
 

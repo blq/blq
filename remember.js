@@ -88,6 +88,9 @@ remember.enable = function(root) {
 				store.set(key, { type: type, value: elem.prop('checked') });
 				break;
 
+			// .hidden?
+			// don't think .file can be handled?
+
 			default:
 				console.warn('blq.remember.enable/save: unsupported element type:', type);
 				break;

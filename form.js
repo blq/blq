@@ -80,9 +80,12 @@ form.toggleForm = function(form, enable) {
 	form = $(form);
 	// todo: handle actual toogle by reading state?
 	form.find(':input, [type=submit]').prop('disabled', !enable);
-	// todo: return form or new state?	
+	// todo: return form or new state?
 };
 
+/**
+ * @param {HTMLFormElement|jQuerySelector}
+ */
 form.disableForm = function(form) {
 	form = $(form);
 	form.find(':input, [type=submit]').prop('disabled', true);
@@ -94,6 +97,9 @@ form.disableForm = function(form) {
 	return form; // ok?
 };
 
+/**
+ * @param {HTMLFormElement|jQuerySelector}
+ */
 form.enableForm = function(form) {
 	form = $(form);
 	form.find(':input, [type=submit]').prop('disabled', false);

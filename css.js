@@ -15,6 +15,7 @@ var css = {}
  * note that it doesn't keep track of already loaded.
  * todo: support custom document to append to?
  * @see https://github.com/filamentgroup/loadCSS
+ * @see using requirejs to load css also!
  *
  * @param {string} url 	todo: support an array?
  * @param {string=} [id]
