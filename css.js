@@ -13,7 +13,9 @@ var css = {}
 /**
  * load and add CSS to the current document.
  * note that it doesn't keep track of already loaded.
+ * todo: support a loaded registry? (or simply memoize?)
  * todo: support custom document to append to?
+
  * @see https://github.com/filamentgroup/loadCSS
  * @see using requirejs to load css also!
  *
