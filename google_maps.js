@@ -5,7 +5,7 @@
  *
  * @author Fredrik Blomqvist
  */
-define([], function() {
+define(['blq/promise'], function(promise) {
 
 'use strict';
 
@@ -15,9 +15,9 @@ var api = {};
  * @param {string} key (yes, you Must use a key now) @see https://developers.google.com/maps/documentation/javascript/get-api-key
  * todo: support a premium 'client' key also
  * todo: expose more args
- * @return {!Promise} receives the 'google.maps' api/namespace
+ * @return {!Promise} receives the 'google.maps' api/namespace (though Google sets it globally also)
  */
-api.loadGoogleMaps = function(key) {
+api._loadGoogleMaps = function(key) {
 	return new Promise(function(resolve, reject) {
 		// must sniff also since we're using the API-ready callback and not the requirejs log.
 		// todo: ..still not 100%. calling this during pending (i.e before the API-ready is a race)
@@ -30,21 +30,32 @@ api.loadGoogleMaps = function(key) {
 
  		// global API-ready "jsonp" style callback
 		// todo: generate as a GUID? (or not? don't want to load twice even if race?)
+		// Must expose callback globally. Set as string to ensure not renamed by a compressor (name-match with jsonp-ish call below)
 		window['_blq_googleMapsReady'] = function() {
 			delete window._blq_googleMapsReady;
-			console.log('Google Maps v:', google.maps.version, 'loaded');
+			console.log('Google Maps v:', google.maps.version, 'loaded (2/2)');
 			resolve(google.maps);
 		};
 		// todo: not sure we can use the global "gm_authFailure"? If it fires, it fires loong _after_ API-"success"..
 		// todo: expose version nr, language etc (-> use a url builder)
+		// todo: or drop requirement on require.js?
 		require(['https://maps.googleapis.com/maps/api/js?key=' + key + '&callback=_blq_googleMapsReady'],
 			function() {
-				console.debug('Google Maps base script loaded. Waiting for the API-ready callback..');
+				console.debug('Google Maps base script loaded. Waiting for the API-ready callback.. (1/2)');
 			},
 			reject
 		);
 	});
 };
+
+
+/**
+ * Caches and handles-races.
+ * lock ensures no race can occur
+ * @param {string} key ! Assumes you only use one key per session (don't think Google can run mutliple keys in same tab anyway?)
+ * @return {!Promise}
+ */
+api.loadGoogleMaps = promise.lockPromiseCall(api._loadGoogleMaps);
 
 
 /**
