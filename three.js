@@ -10,7 +10,7 @@ define([
 var api = {};
 
 
-/** 
+/**
  * (wrapped in factory to avoid load-time dep on THREE)
  * @return {!THREE.Texture}
  */
@@ -45,7 +45,7 @@ api.getDummyTexture = function() {
 
 /**
  * for use when you want the real load/err confirmation
- * todo: hmm, or use dummy-texture-pattern instead? (and by synchronous)
+ * todo: hmm, or use dummy-texture-pattern instead? (and be synchronous)
  * @param {string} url
  * @param {Function=} opt_progress
  * @return {!Promise}

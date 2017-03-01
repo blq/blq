@@ -6,6 +6,7 @@
  *
  * todo: flags to opt-out of the 'debugger' statement? and control if just log and/or throw?
  * todo: hmm, or just use goog.asserts? (unneccesarily big with string lib deps etc though..)
+ * todo: or just use console.assert() ?
  *
  */
 
