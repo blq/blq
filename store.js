@@ -29,7 +29,12 @@ var store = {
 	// todo: detection code? (private mode browsing. fallback to in-memory emulation?)
 	// store.enabled: boolean ?
 
-	// low-level get but without any default or checks
+	/**
+	 * low-level get without any default or checks
+	 * @param {string} key
+	 * @return {*}
+	 * @private
+	 */
 	_get: function(key) {
 		return store.fromJSON(store.getRaw(key));
 	},
@@ -119,6 +124,7 @@ var store = {
 	// if callback returns 'false' breaks the loop (following jQuery's each-convention).
 	// todo: or split in two? each(key, value) & eachKey(key) ?
 	// -> or use the new ES6 iteration instead!
+	// todo: expose a 'thisArg'?
 	each: function(callback) {
 		// ! always iterate backwards. Then both add and remove(of current elem) can be done by the callback in the loop.
 		for (var i = store._storage.length - 1; i >= 0; --i) {
