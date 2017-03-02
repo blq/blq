@@ -16,11 +16,11 @@
  *
  */
 define([
-	'blq/assert',
+	// 'blq/assert',
 //	'jquery', // only for the jQuery 2 parts. -> assume user has loaded jQuery if those functions are called!
 //	'polyfills/es6-promise', // todo: drop? all browser we care about has it..
 	'MochiKit/Async' // (actually AMD via our shim now, though not natively)
-], function(assert/*, _promise*/) {
+], function(/*assert*//*, _promise*/) {
 
 'use strict';
 
@@ -35,7 +35,7 @@ var blq = {};
  * @return {!MochiKit.Async.Deferred}
  */
 blq.jQueryDeferredToMochiKitDeferred = function(jd) {
-	assert(jd != null);
+	// assert(jd != null);
 
 	var md = new MochiKit.Async.Deferred();
 	jd.then(md.callback.bind(md), md.errback.bind(md));
@@ -51,7 +51,7 @@ blq.jQueryDeferredToMochiKitDeferred = function(jd) {
  * @return {!jQuery.Promise}
  */
 blq.mochiKitDeferredTojQueryPromise = function(md) {
-	assert(md != null);
+	// assert(md != null);
 
 	var jd = jQuery.Deferred();
 	md.addCallbacks(jd.resolve.bind(jd), jd.reject.bind(jd));
@@ -177,7 +177,7 @@ blq._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
  * @return {!Promise} ES6 Promise
  */
 blq.mochiKitDeferredToPromise = function(d) {
-	assert(d != null); // could use instanceof MK.Def ?
+	// assert(d != null); // could use instanceof MK.Def ?
 
 	return new Promise(function(resolve, reject) {
 		// handle first addCallbacks(), then user is assumed to use only the MK.Deferred API/conventions
@@ -197,7 +197,7 @@ blq.mochiKitDeferredToPromise = function(d) {
  * @return {!Deferred}
  */
 blq.promiseToMochiKitDeferred = function(p) {
-	assert(p != null);
+	// assert(p != null);
 
 	var d = new MochiKit.Async.Deferred();
 	p.then(d.callback.bind(d), d.errback.bind(d));
@@ -630,6 +630,31 @@ blq.jQueryPromiseToES6Promise = function(jp) {
 	return Promise.resolve(jp);
 };
 
+
+/**
+ * Promise.all() but using a dictionary for easier, order independent, lookup
+ * todo: same for Promise.race() ?
+ * @param {!Object<string, (Promise|*)} dictPromises
+ * @return {!Promise}
+ */
+blq.allDict = function(dictPromises) {
+	// dict -> index
+	var listPromises = [];
+	var indexToKey = [];
+	for (var k in dictPromises) {
+		listPromises.push(Promise.resolve(dictPromises[k])); // wrap to handle plain values also
+		indexToKey.push(k);
+	}
+
+	return Promise.all(listPromises).then(function(result) {
+		// map back to dictionary
+		var ret = {};
+		result.forEach(function(res, i) {
+			ret[indexToKey[i]] = res;
+		});
+		return ret;
+	});
+};
 
 
 return blq;
