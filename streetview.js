@@ -1,4 +1,13 @@
 /**
+ * @fileoverview
+ *
+ * @see https://developers.google.com/maps/documentation/streetview/
+ *
+ * todo: similar for Photosphere!
+ *
+ * todo: remove dep on MK.Text?
+ *
+ * @author Fredrik Blomqvist
  *
  */
 define(['blq/assert', 'MochiKit/Text'], function(assert) {
@@ -9,8 +18,8 @@ var street = {};
 /**
  * Grabs a Google Streetview scene as a six faced image cubemap.
  *
- * todo: support for map key (needed?)
  * todo: support custom angle? (fov, pitch)?
+ * todo: support sniffing if view is available? https://developers.google.com/maps/documentation/streetview/metadata
  *
  * @param {!LatLng} latlng
  * @param {Object=} [options]
@@ -19,9 +28,10 @@ var street = {};
 street.getStreetviewImageCubeUrls = function(latlng, options) {
 	assert(blq.isLatLngLike(latlng));
 
-	// todo: more options, map key, initial angle etc
+	// todo: more options? initial angle etc
 	options = Object.assign({
 		size: 256 // supports {w, h} also
+		// todo: validate key?
 	}, options);
 
 	// overload on single value (most common to be square)
@@ -33,11 +43,11 @@ street.getStreetviewImageCubeUrls = function(latlng, options) {
 
 	// todo: force decimal point formatting?
 	// todo: append this root url to result somehow?
-	var fmt = 'https://maps.googleapis.com/maps/api/streetview?size={size.w}x{size.h}&location={pos.lat},{pos.lng}&heading={heading}&fov={fov}&pitch={pitch}&sensor=false';
+	var fmt = 'https://maps.googleapis.com/maps/api/streetview?size={size.w}x{size.h}&location={pos.lat},{pos.lng}&heading={heading}&fov={fov}&pitch={pitch}&key={key}';
 
 	// todo: check conventions that other tools use (or allow to specify ordering? flips?)
 	// todo: or rename north, west etc?
-	var dirs = {
+	var cube = {
 		left: { h: -90 },
 		front: { h: 0 },
 		right: { h: 90 },
@@ -46,26 +56,29 @@ street.getStreetviewImageCubeUrls = function(latlng, options) {
 		bottom: { h: 0, p: 90 }
 	};
 
-	for (var side in dirs) {
+	for (var side in cube) {
 		var url = format(fmt, {
 			size: options.size,
 			pos: latlng,
-			heading: dirs[side].h,
-			pitch: 0 || dirs[side].p,
-			fov: 90
+			heading: cube[side].h,
+			pitch: 0 || cube[side].p,
+			fov: 90, // we want a cube so we lock fov to 90 degrees
+			key: options.key
 		});
 
-		dirs[side] = url;
+		cube[side] = url;
 	}
 
-	return dirs;
+	return cube;
 };
+
 
 /**
  * @see getStreetviewImageCubeUrls
- * @param {!LatLng} latlng
- * @param {Object=} [options]
  * todo: (have to figure out if/when images are completely loaded some other way. i.e we don't return a promise!) onload event-hook.
+ *
+ * @param {!LatLng} latlng
+ * @param {Object=} [options] same as for getStreetviewImageCubeUrls
  * @return {!{ left: !Image, front: !Image, right: !Image, back: !Image, top: !Image, down: !Image }} cubemap images
  */
 street.getStreetviewImageCube = function(latlng, options) {
