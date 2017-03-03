@@ -634,7 +634,7 @@ blq.jQueryPromiseToES6Promise = function(jp) {
 /**
  * Promise.all() but using a dictionary for easier, order independent, lookup
  * todo: same for Promise.race() ?
- * @param {!Object<string, (Promise|*)} dictPromises
+ * @param {!Object<string, (Promise|Thenable|*)} dictPromises
  * @return {!Promise}
  */
 blq.allDict = function(dictPromises) {
@@ -653,6 +653,40 @@ blq.allDict = function(dictPromises) {
 			ret[indexToKey[i]] = res;
 		});
 		return ret;
+	});
+};
+
+/**
+ * like MochiKit.Async.DeferredList in 'consumeErrors' mode
+ * @see http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferredlist
+ * todo: dictionary variant? (todo: or just mimic a MK DeferredList with flags?)
+ * Note that this method will always succeed. The value or error is in result tuple[1]
+ * @param {!ArrayLike<Promise|*>} promises (ok to allow values?)
+ * @return {!Promise} Array<[boolean, result]> tuples
+ */
+blq.allConsume = function(promises) {
+	if (promises.length == 0) {
+		return Promise.resolve([]);
+	}
+	return new Promise(function(resolve, reject) {
+		var results = new Array(promises.length);
+		var counter = promises.length;
+		Array.prototype.forEach.call(function(p, i) {
+			Promise.resolve(p) // wrap to allow values also. ok?
+				.then(
+					function(res) {
+						results[i] = [true, res];
+					},
+					function(fail) {
+						results[i] = [false, fail];
+					}
+				)
+				.then(function() {
+					if (--counter == 0) {
+						resolve(results);
+					}
+				});
+		});
 	});
 };
 
