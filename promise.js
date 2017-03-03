@@ -60,6 +60,8 @@ blq.mochiKitDeferredTojQueryPromise = function(md) {
 
 
 /**
+ * @deprecated don't really care about emulating jQuery 2 anymore.. (jQuery 3 is A+ compliant apparently)
+ *
  * Experimental.
  * "hacks" MK.Deferred to also expose methods that makes its interface compatible
  * with the corresponding jQuery.Promise style (jQ 1.8 state, without methods deprecated in 1.7+)
@@ -656,11 +658,13 @@ blq.allDict = function(dictPromises) {
 	});
 };
 
+
 /**
  * like MochiKit.Async.DeferredList in 'consumeErrors' mode
  * @see http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferredlist
  * todo: dictionary variant? (todo: or just mimic a MK DeferredList with flags?)
  * Note that this method will always succeed. The value or error is in result tuple[1]
+ *
  * @param {!ArrayLike<Promise|*>} promises (ok to allow values?)
  * @return {!Promise} Array<[boolean, result]> tuples
  */
@@ -671,7 +675,7 @@ blq.allConsume = function(promises) {
 	return new Promise(function(resolve, reject) {
 		var results = new Array(promises.length);
 		var counter = promises.length;
-		Array.prototype.forEach.call(function(p, i) {
+		Array.prototype.forEach.call(promises, function(p, i) {
 			Promise.resolve(p) // wrap to allow values also. ok?
 				.then(
 					function(res) {
