@@ -86,7 +86,7 @@ street.getStreetviewImageCube = function(latlng, options) {
 
 	var images = {};
 	for (var side in urls) {
-		var img = new Image();
+		var img = new Image(); // todo: version that hooks to onload and onerror -> Promise
 		img.src = urls[side];
 		images[side] = img;
 	}
