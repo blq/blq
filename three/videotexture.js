@@ -118,7 +118,7 @@ api.createVideoTexture = function(urlOrStream, options) {
 			video.src = urlOrStream;
 		} else {
 			if (typeof video.srcObject == 'object') {
-				video.srcObject = url;
+				video.srcObject = urlOrStream;
 			} else {
 				// todo: how many browsers we care about does Not support srcObject?
 				video.src = URL.createObjectURL(urlOrStream);
