@@ -30,8 +30,8 @@ media.polyfill.enableGetUserMedia = function() {
  * splits the types into three lists: cameras, microphones and other
  * @return {!Promise} Array.<!{ cameras: !Array.<!Object>, microphones: !Array.<!Object>, other: !Array.<!Object> }>
  */
-media._getMediaSources = function() {	
-	return new Promise(function(resolve, reject) {		
+media._getMediaSources = function() {
+	return new Promise(function(resolve, reject) {
 		if (typeof MediaStreamTrack == 'undefined' || typeof MediaStreamTrack.getSources == 'undefined') {
 			var msg = 'MediaStreamTrack not supported';
 			console.warn(msg);
@@ -54,7 +54,7 @@ media._getMediaSources = function() {
 		  console.log(err.name + ": " + error.message);
 		});
 		*/
-	
+
 		MediaStreamTrack.getSources(function(sources) {
 			var cams = [];
 			var mics = [];
@@ -81,7 +81,7 @@ media._getMediaSources = function() {
 				microphones: mics,
 				other: other
 			});
-		});		
+		});
 	});
 };
 
@@ -119,6 +119,7 @@ media._getVideoUrl = function(sourceId) {
 		navigator.getUserMedia(constraints,
 		// MediaDevices.getUserMedia(constraints, // ?
 			function(stream) {
+				// todo: ? or use video.srcObject = stream directly?!
 				var videoUrl = window.URL.createObjectURL(stream);
 				resolve(videoUrl);
 			},
