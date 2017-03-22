@@ -46,6 +46,7 @@ api.getDummyTexture = function() {
 /**
  * for use when you want the real load/err confirmation
  * todo: hmm, or use dummy-texture-pattern instead? (and be synchronous)
+ *	-> PromiseTexture(). texture that is *both* a promise and texture, before load just a dummy!
  * @param {string} url
  * @param {Function=} opt_progress
  * @return {!Promise}
