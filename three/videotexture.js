@@ -1,5 +1,8 @@
 /**
+ * @fileoverview
  * very similar to THREE's, but better teardown - the update runs forever otherwise!
+ * reported here: https://github.com/mrdoob/three.js/issues/8525
+ *
  * todo: *still* some case when webgl claims "no video" _after_ teardown...
  *
  * @author Fredrik Blomqvist
@@ -38,16 +41,12 @@ api.VideoTexture = function ( video, mapping, wrapS, wrapT, magFilter, minFilter
 	var req = null;
 
 	function update() {
-
 		req = requestAnimationFrame( update );
 
 	//	if ( video.readyState === video.HAVE_ENOUGH_DATA ) {
 		if ( video.readyState >= video.HAVE_CURRENT_DATA ) {
-
 			scope.needsUpdate = true;
-
 		}
-
 	}
 
 	function teardown(e) {
@@ -66,7 +65,6 @@ api.VideoTexture = function ( video, mapping, wrapS, wrapT, magFilter, minFilter
 	// todo: expose .pause() and .play() methods?
 
 	update();
-
 };
 
 api.VideoTexture.prototype = Object.create( THREE.Texture.prototype );
@@ -75,10 +73,15 @@ api.VideoTexture.prototype.constructor = api.VideoTexture;
 
 /**
  * factory for url
+ *
  * todo: support fallback formats?
+ * todo: also overload on canvas? and implicitly use captureStream?
+ * todo: frame update throttling?
+ *
+ * @param {string|Stream} urlOrstream
  * @return {!Promise}
  */
-api.createVideoTexture = function(url, options) {
+api.createVideoTexture = function(urlOrStream, options) {
 	options = Object.assign({
 		autoplay: true,
 		loop: true,
@@ -111,7 +114,16 @@ api.createVideoTexture = function(url, options) {
 			reject(err);
 		};
 
-		video.src = url;
+		if (typeof urlOrStream == 'string') {
+			video.src = urlOrStream;
+		} else {
+			if (typeof video.srcObject == 'object') {
+				video.srcObject = url;
+			} else {
+				// todo: how many browsers we care about does Not support srcObject?
+				video.src = URL.createObjectURL(urlOrStream);
+			}
+		}
 		video.play(); // ! needed on Chrome Android (autoplay + muted=true should autplay though)
 
 	}).then(function(video) {
@@ -130,6 +142,7 @@ api.createVideoTexture = function(url, options) {
 		return texture;
 	});
 };
+
 
 return api;
 
