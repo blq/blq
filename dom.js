@@ -136,6 +136,42 @@ dom.getIframeWindow = function(iframe) {
 };
 
 
+/**
+ * umm, name?..
+ * @return {Object} handle that can be used to disconnect
+ */
+dom.onMaybeDelegated = function(elemOrSel, event, fn) {
+	// todo: package as a handler !
+	var delegated = typeof elemOrSel == 'string';
+	var root = delegated ? document : elemOrSel;
+	var delsel = delegated ? elemOrSel : null;
+
+	$(root).on(event, delsel, fn);
+
+	return {
+		dispose: function() {
+			$(root).off(event, delsel, fn);
+		}
+	};
+};
+
+
+/**
+ * @param {string} event
+ * @param {!Object.<string, ?Function>} delegates selector->function dictionary, skips null slots
+ */
+dom.multiDelegate = function(event, delegates) {
+	assert(event != null);
+	assert(delegates != null);
+
+	for (var del in delegates) {
+		var fn = delegates[del];
+		//assert(typeof fn == 'function');
+		if (typeof fn == 'function') // filter out only fns for convenience (i.e allow inline code in the dict to simply set null for example)
+			$(document).on(event, del, fn);
+	}
+};
+
 
 return dom;
 
