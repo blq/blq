@@ -4,7 +4,7 @@
  *
  * @see https://www.mapbox.com/mapbox-gl-js/api/
  * @see https://github.com/mapbox/mapbox-gl-js
- * At time of writing v0.28.0
+ * At time of writing v0.33.1
  *
  * @author Fredrik Blomqvist
  *
@@ -55,8 +55,9 @@ api.createMapBoxGL = function(container, center, opt) {
 		keyboard: false,
 
 		showNavigation: true,
-		showGeolocation: true,
-		showScale: true
+		showGeolocation: true, // needs https domain
+		showScale: true,
+		showFullscreen: false
 	}, opt);
 
 	return api.loadMapBoxScript()
@@ -77,15 +78,17 @@ api.createMapBoxGL = function(container, center, opt) {
 		.then(function(map) {
 
 			if (opt.showNavigation) {
-				map.addControl(new mapboxgl.NavigationControl({ position: 'top-left' }));
+				map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 			}
 			if (opt.showGeolocation) {
 				// note that geolocation button apparently resets the pitch
-				map.addControl(new mapboxgl.GeolocateControl({ position: 'top-right' }));
+				map.addControl(new mapboxgl.GeolocateControl(), 'top-right');
 			}
 			if (opt.showScale) {
-				// scale control new in 0.23
-				map.addControl(new mapboxgl.ScaleControl({ position: 'bottom-left' })); // position is optional
+				map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+			}
+			if (opt.showFullscreen) {
+				map.addControl(new mapboxgl.FullscreenControl(), 'bottom-right');
 			}
 
 			return map;
