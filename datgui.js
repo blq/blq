@@ -1,6 +1,8 @@
 /**
  * @see https://code.google.com/p/dat-gui/
  *
+ * todo: cool to create some kind of direct binders to Vue or Angular maybe?
+ *
  * @author Fredrik Blomqvist
  *
  */
@@ -69,7 +71,7 @@ define(['blq/assert', 'jquery', 'dat/dat.gui'], function(assert, $, GUI) {
  * todo: support presets
  *
  * @param {!DAT.GUI} gui
- * @param {!Object} decl describes the values, constraints etc
+ * @param {!Array<Object>} decl describes the values, constraints etc. (null is ignored)
  * @param {!Object} params storage dictionary for the actual values
  */
 blq._bindDatGUI = function(gui, decl, params) {
@@ -77,7 +79,9 @@ blq._bindDatGUI = function(gui, decl, params) {
 	assert(decl != null);
 	assert(params != null);
 
-	$.each(decl, function(i, p) {
+	decl.forEach(function(p) {
+		if (p == null)
+			return; // == continue
 		var val = p.value;
 		var ctrl = null;
 		if (Array.isArray(val)) {
