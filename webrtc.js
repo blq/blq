@@ -64,8 +64,9 @@ media._getMediaSources = function() {
 				if (source.kind == 'video') {
 					// camera.facing is always "" on my laptop, but apparently can/should be "environment" or "user" (mobiles)
 					// dump some debug
-					if (source.facing != '')
+					if (source.facing != '') {
 						console.debug('video/camera facing:', source.facing);
+					}
 
 					cams.push(source);
 				} else
@@ -92,6 +93,8 @@ media._getMediaSources = function() {
  * returns only when the user actively has agreed on camera access!
  *
  * observe that after use it's recommended to dipose the url using: URL.revokeObjectURL(url);
+ * todo: -> new API with streams should deprecate this and instead use video.srcObject = stream!
+ * (i.e this method should instead become "getVideoStream")
  *
  * todo: hmm, maybe blob url isn't necessary all the time?
  * can maybe assign stream directly to <video>.srcObject ! @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/srcObject
