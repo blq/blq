@@ -1,10 +1,10 @@
 /**
  * @fileoverview
- * Async helpers. For MochiKit, jQuery(2), and ES6 Promise etc
+ * Async helpers. For MochiKit, jQuery(2+), and ES6 Promise etc
  *
  * @see https://promisesaplus.com/
  * @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html
- * @see
+ * @see http://bluebirdjs.com/docs/getting-started.html
  *
  * todo: drop the Promise-polyfill? all relevant platforms support it ok now
  * todo: drop all jQuery stuff once we move to jQuery 3 that has real A+ Promises (hmm, but still the jQ.Deferred object stuff??)
@@ -16,7 +16,7 @@
  *
  */
 define([
-	// 'blq/assert',
+//	'blq/assert',
 //	'jquery', // only for the jQuery 2 parts. -> assume user has loaded jQuery if those functions are called!
 //	'polyfills/es6-promise', // todo: drop? all browser we care about has it..
 	'MochiKit/Async' // (actually AMD via our shim now, though not natively)
@@ -25,7 +25,7 @@ define([
 'use strict';
 
 // namespace
-var blq = {};
+var api = {};
 
 /**
  * This is for jQuery < 3. 3+ uses real Promises
@@ -34,7 +34,7 @@ var blq = {};
  * @param {!(jQuery.Deferred|jQuery.Promise)} jd (just saying Promise is actually enough since Deferred inherits from it (or Promise is a subset of it). but add both for clarity)
  * @return {!MochiKit.Async.Deferred}
  */
-blq.jQueryDeferredToMochiKitDeferred = function(jd) {
+api.jQueryDeferredToMochiKitDeferred = function(jd) {
 	// assert(jd != null);
 
 	var md = new MochiKit.Async.Deferred();
@@ -50,7 +50,7 @@ blq.jQueryDeferredToMochiKitDeferred = function(jd) {
  * @param {!MochiKit.Async.Deferred} md
  * @return {!jQuery.Promise}
  */
-blq.mochiKitDeferredTojQueryPromise = function(md) {
+api.mochiKitDeferredTojQueryPromise = function(md) {
 	// assert(md != null);
 
 	var jd = jQuery.Deferred();
@@ -92,7 +92,7 @@ blq.mochiKitDeferredTojQueryPromise = function(md) {
  * @return {!(T|MochiKit.Async.Deferred.prototype)} same obj passed in constructor or default MochiKit.Async.Deferred.prototype
  * @template T
  */
-blq._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
+api._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
 	var mkdp = obj || MochiKit.Async.Deferred.prototype;
 
 	// @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallbacks
@@ -178,7 +178,7 @@ blq._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
  * @param {!Deferred} d
  * @return {!Promise} ES6 Promise
  */
-blq.mochiKitDeferredToPromise = function(d) {
+api.mochiKitDeferredToPromise = function(d) {
 	// assert(d != null); // could use instanceof MK.Def ?
 
 	return new Promise(function(resolve, reject) {
@@ -198,7 +198,7 @@ blq.mochiKitDeferredToPromise = function(d) {
  * @param {!Promise} p ES6 Promise todo: actually compatible with jQuery etc also ("thenable"). change name?
  * @return {!Deferred}
  */
-blq.promiseToMochiKitDeferred = function(p) {
+api.promiseToMochiKitDeferred = function(p) {
 	// assert(p != null);
 
 	var d = new MochiKit.Async.Deferred();
@@ -227,7 +227,7 @@ blq.promiseToMochiKitDeferred = function(p) {
  * @param {function(): !Promise} fn
  * @return {function(): !Promise}
  */
-blq.lockPromiseCall = function(fn) {
+api.lockPromiseCall = function(fn) {
 	var p = null;
 	return function() {
 		if (p == null) {
@@ -254,21 +254,21 @@ blq.lockPromiseCall = function(fn) {
  * @param {boolean} retryOnFail default false
  * @return {function(): !Promise}
  */
-blq.singletonWrap = function(fn, id, retryOnFail) {
+api.singletonWrap = function(fn, id, retryOnFail) {
 	// _global_ registry of pending/finished promises (yes, local memo can work if you know you only make one-spot call, but global is global..)
-	blq.singletonWrap._promises = blq.singletonWrap._promises || {
+	api.singletonWrap._promises = api.singletonWrap._promises || {
 		// id->Promise
 	};
 
 	retryOnFail = retryOnFail || false;
 
 	return function() {
-		var p = blq.singletonWrap._promises[id];
+		var p = api.singletonWrap._promises[id];
 		if (p == null) {
-			p = blq.singletonWrap._promises[id] = fn.apply(this, arguments);
+			p = api.singletonWrap._promises[id] = fn.apply(this, arguments);
 			if (retryOnFail) { // todo: try-on-fail should also probably be complemented with a (progressive) delay (think ajax and server overload..)
 				p.catch(function(err) {
-					blq.singletonWrap._promises[id] = null;
+					api.singletonWrap._promises[id] = null;
 					throw err;
 				});
 			}
@@ -293,7 +293,7 @@ blq.singletonWrap = function(fn, id, retryOnFail) {
  * @param {function(): !Promise} fn
  * @return {function(): !Promise}
  */
-blq.queuePromises = function(fn) {
+api.queuePromises = function(fn) {
 	var queue = [];
 
 	// todo: not ready!
@@ -327,7 +327,7 @@ blq.queuePromises = function(fn) {
  * @param {!Array.<string>|string} scripts todo: allow iterable?
  * @return {!Promise}
  */
-blq.requirePromise = function(scripts) {
+api.requirePromise = function(scripts) {
 	scripts = Array.isArray(scripts) ? scripts : [scripts];
 
 	return new Promise(function(resolve, reject) {
@@ -350,9 +350,9 @@ blq.requirePromise = function(scripts) {
  * @param {!Object<string, string>} scriptNameDict scriptName->Name (todo: maybe also allow an Array of Array or pairs?)
  * @return {!Promise<!Object<string, !Object>>} // Name->Module
  */
-blq.requirePromiseDict = function(scriptNameDict) {
+api.requirePromiseDict = function(scriptNameDict) {
 	var scripts = Object.keys(scriptNameDict);
-	return blq.requirePromise(scripts).then(function(amd_modules) {
+	return api.requirePromise(scripts).then(function(amd_modules) {
 		// map loaded modules back to keyname
 		var ret = {};
 		scripts.forEach(function(key, i) {
@@ -373,7 +373,7 @@ blq.requirePromiseDict = function(scriptNameDict) {
  * @param {function(function, function)} executor
  * @return {!Deferred}
  */
-blq.createDeferred = function(executor) {
+api.createDeferred = function(executor) {
 	if (typeof executor != 'function') {
 		// A+ Promise doesn't convert invalid fn to Promise, fail immediately at top-level!
 		// call just to provoke native "is not a function" exception (TypeError)
@@ -406,7 +406,7 @@ blq.createDeferred = function(executor) {
  * @param {function} fn
  * @return {function(): !Promise}
  */
-blq.promisify = function(fn) { // name? makeAsync?
+api.promisify = function(fn) { // name? makeAsync?
 	// todo: maybe detect if already promisified? (add a tag?)
 	return function() {
 		return Promise.all(arguments).then(function(rets) {
@@ -425,7 +425,7 @@ blq.promisify = function(fn) { // name? makeAsync?
  *
  * @return {!Promise} with added resolve() and reject() methods
  */
-blq.deferredPromise = function() {
+api.deferredPromise = function() {
 	var _resolve, _reject;
 
 	var dp = new Promise(function(resolve, reject) {
@@ -450,11 +450,30 @@ blq.deferredPromise = function() {
 
 
 /**
+ * factory for a Promise with an external .cancel() method (i.e same as reject)
+ * todo: hmm, this setup basically needs a state flag also? or simply let the silent 2nd trigger be left ignored?
+ * @param {function(Function, Function)} resolver
+ * @return {!Promise}
+ */
+api.cancelablePromise = function(resolver) {
+	// similar setup as deferredPromise()
+	var _reject;
+	var pr = new Promise(function(resolve, reject) {
+		_reject = reject;
+		resolver(resolve, reject);
+	});
+	pr.cancel = reject;
+	return pr;
+};
+
+
+
+/**
  * todo: name? delay()?
  * @param {integer} ms
  * @return {!Promise}
  */
-blq.wait = function(ms) {
+api.wait = function(ms) {
 	return new Promise(function(resolve, reject) {
 		// have to wrap resolve() once to guard against
 		// the (non standard..) args to setTimeout some browsers send.
@@ -470,7 +489,7 @@ blq.wait = function(ms) {
  * @param {*=} opt_err
  * @return {!Promise}
  */
-blq.timeout = function(p, ms, opt_err) {
+api.timeout = function(p, ms, opt_err) {
 	return new Promise(function(resolve, reject) {
 		var th = setTimeout(function() {
 			th = null;
@@ -504,7 +523,7 @@ blq.timeout = function(p, ms, opt_err) {
  * @param {Function} callback
  * @return {!Promise}
  */
-blq.tap = function(p, callback) {
+api.tap = function(p, callback) {
 	p.then(function(val) {
 		// "lift" call outside the try-catch guard
 		// todo: hmm, could also only move an actual error-throw outside? (i.e re-throw in settimeout)
@@ -517,7 +536,13 @@ blq.tap = function(p, callback) {
 };
 
 
-blq.finally = function(p, callback) {
+/**
+ * try-catch-finally analogue
+ * @param {!Promise} p
+ * @param {!Function} callback gets no input args.
+ * @return {!Promise} same as input. Not affeced by callback return/throw
+ */
+api.finally = function(p, callback) {
 	var fn = function() {
 		// "lift" call outside the try-catch guard
 		setTimeout(function() {
@@ -534,8 +559,11 @@ blq.finally = function(p, callback) {
 
 // test. inspired by Bluebird
 // todo: custom teardown method/function? (simply use/assume (goog.)IDisposable ?)
-blq.using = function(disposable, fn) {
-	 return disposable.promise()
+api.using = function(disposable, fn) {
+	assert(typeof disposable.promise == 'function');
+	assert(typeof disposable.dispose == 'function');
+
+	return disposable.promise()
 		.then(fn)
 		.then(
 			function(val) {
@@ -553,7 +581,7 @@ blq.using = function(disposable, fn) {
 
 // similar to bluebird but witout inspection
 // to be fed into using(). Does Not return a Promise
-blq.disposer = function(p, dispose) {
+api.disposer = function(p, dispose) {
 	return {
 		// this method is basically only intended
 		// to be used by using(), "protected"
@@ -589,8 +617,10 @@ using(getConnection(), function(conn) {
  *
  * ! Subtle: ES6 Promises are stateless (each .then a new Promise), MK Deferred keeps a chain from/in the source Deferred.
  * -> deferred.then(..) spawns an new true ES6 chain, any MK Deferred addCallbacks after that will not affect it.
+ * @param {(MochiKit.Async.Deferred|MochiKit.Async.Deferred.prototype)=} deferred default MochiKit.Async.Deferred.prototype
+ * @return {(MochiKit.Async.Deferred|MochiKit.Async.Deferred.prototype)} chained
  */
-blq.injectPromiseInDeferred = function(deferred) { // name? makeDeferredThenable?
+api.injectPromiseInDeferred = function(deferred) { // name? makeDeferredThenable?
 	var mkdp = deferred || MochiKit.Async.Deferred.prototype;
 
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then
@@ -627,7 +657,7 @@ blq.injectPromiseInDeferred = function(deferred) { // name? makeDeferredThenable
  * @param {!jQuery.Deferred}
  * @return {!Promise}
  */
-blq.jQueryPromiseToES6Promise = function(jp) {
+api.jQueryPromiseToES6Promise = function(jp) {
 	// simple :) (ok?)
 	return Promise.resolve(jp);
 };
@@ -639,7 +669,7 @@ blq.jQueryPromiseToES6Promise = function(jp) {
  * @param {!Object<string, (Promise|Thenable|*)} dictPromises
  * @return {!Promise}
  */
-blq.allDict = function(dictPromises) {
+api.allDict = function(dictPromises) {
 	// dict -> index
 	var listPromises = [];
 	var indexToKey = [];
@@ -665,10 +695,10 @@ blq.allDict = function(dictPromises) {
  * todo: dictionary variant? (todo: or just mimic a MK DeferredList with flags?)
  * Note that this method will always succeed. The value or error is in result tuple[1]
  *
- * @param {!ArrayLike<Promise|*>} promises (ok to allow values?)
+ * @param {!ArrayLike<Promise|*>} promises (ok to allow mixed values?)
  * @return {!Promise} Array<[boolean, result]> tuples
  */
-blq.allConsume = function(promises) {
+api.allConsume = function(promises) {
 	if (promises.length == 0) {
 		return Promise.resolve([]);
 	}
@@ -695,6 +725,86 @@ blq.allConsume = function(promises) {
 };
 
 
-return blq;
+/**
+ * Assuming input promise returns an array the array is "spread" into individual arguments to callback.
+ * Typically used with all()-like methods
+ * @param {!Promise} p
+ * @return {!Thenable} ok? or use a full Promise? (multi-arg .then is not standard though..)
+ */
+api.spread = function(p) {
+	return {
+		then: function(callback, errback) {
+			return p.then(
+				function(arr) {
+					return callback.apply(null, arr);
+				},
+				errback
+			);
+		}
+	};
+};
+
+
+/**
+ * Note: this is Not a multi-bind!
+ * This binds *pure* functions, taking the object as first arg to become methods instead.
+ *
+ * todo: move this elsewhere?
+ * todo: name? extension methods
+ *
+ * @param {!Object} obj
+ * @param {!Object<string, Function>} methods
+ * @return {!Object} obj with methods attached
+ */
+function bindTo(obj, methods) {
+	for (var k in methods) {
+		var fn = methods[k];
+		if (typeof fn != 'function') // ignore nulls (ok?)
+			continue;
+		obj[k] = fn.bind(null, obj); // or obj as context also? (not style of Promise though)
+	}
+	return obj;
+}
+
+
+function makeChainable(obj, methods) {
+	for (var k in methods) {
+		var fn = methods[k].bind(null, obj);
+		obj[k] = function() {
+			// re-bind
+			return makeChainable(fn.apply(null, arguments), methods);
+		};
+	}
+	return obj;
+}
+
+
+/**
+ * experimental
+ * creates a wrapper Promise-like object
+ * around p that also exposes the method-like
+ * functions in this API as methods. allowing easier chained calls.
+ * (i.e will look more like Bluebird API for example)
+ *
+ * the return Promises of these methods will also be wrapped.
+ *
+ * todo: convention or registry for the methods to attach?
+ * todo: name? "wrap"? "makeMethods?" "extendWith" ?
+ * @param {!Promise} p
+ * @return {!Promise} but with exposed API from here as chainable methods
+ */
+api.wrap = function(p) {
+	// todo: what's "best"? mutate a Promise or store Promise as property in the wrapper?
+	return makeChainable(p, {
+		tap: api.tap,
+		finally: api.finally,
+		timeout: api.timeout,
+		spread: api.spread
+	});
+};
+
+
+
+return api;
 
 });
