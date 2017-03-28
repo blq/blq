@@ -705,6 +705,13 @@ api.allConsume = function(promises) {
 	return new Promise(function(resolve, reject) {
 		var results = new Array(promises.length);
 		var counter = promises.length;
+
+		var _checkEnd = function() {
+			if (--counter == 0) {
+				resolve(results);
+			}
+		};
+
 		Array.prototype.forEach.call(promises, function(p, i) {
 			Promise.resolve(p) // wrap to allow values also. ok?
 				.then(
@@ -715,11 +722,7 @@ api.allConsume = function(promises) {
 						results[i] = [false, fail];
 					}
 				)
-				.then(function() {
-					if (--counter == 0) {
-						resolve(results);
-					}
-				});
+				.then(_checkEnd, _checkEnd);
 		});
 	});
 };
