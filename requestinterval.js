@@ -34,6 +34,7 @@ var requestInterval = function (fn, delay) {
 	handle.value = requestAnimFrame(loop);
 	return handle;
 };
+
 /*!
  * Behaves the same as clearInterval except uses cancelRequestAnimationFrame()
  * where possible for better performance
@@ -50,6 +51,7 @@ var clearRequestInterval = function (handle) {
 		window.clearInterval(handle);
 	}
 };
+
 /*!
  * Behaves the same as setTimeout except uses requestAnimationFrame()
  * where possible for better performance
@@ -82,6 +84,7 @@ var requestTimeout = function (fn, delay) {
 	handle.value = requestAnimFrame(loop);
 	return handle;
 };
+
 /*!
  * Behaves the same as clearTimeout except uses cancelRequestAnimationFrame()
  * where possible for better performance
@@ -97,5 +100,4 @@ var clearRequestTimeout = function (handle) {
 	} else {
 		window.clearTimeout(handle);
 	}
-
 };
