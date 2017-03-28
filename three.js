@@ -53,9 +53,9 @@ api.getDummyTexture = function() {
  */
 api.loadTexture = function(url, opt_progress) {
 	return new Promise(function(resolve, reject) {
-		var loader = new THREE.TextureLoader(); // todo: should we bother caching this?
-		var texture = loader.load(url,
-			function onload() {
+		var loader = new THREE.TextureLoader(); // todo: should we bother caching this? todo: support 'manager'?
+		loader.load(url,
+			function onload(texture) {
 				resolve(texture);
 			},
 			function onprogress() {
