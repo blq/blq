@@ -732,6 +732,20 @@ api.allConsume = function(promises) {
  * @return {!Thenable} ok? or use a full Promise? (multi-arg .then is not standard though..)
  */
 api.spread = function(p) {
+	var sp = Promise.resolve(p);
+	// monkey patch
+	var _then = sp.then;
+	sp.then = function(callback, errback) {
+		return _then.call(sp,
+			function(arr) {
+				return callback.apply(null, arr);
+			},
+			errback
+		);
+	};
+	return sp;
+
+	/*
 	return {
 		then: function(callback, errback) {
 			return p.then(
@@ -742,6 +756,7 @@ api.spread = function(p) {
 			);
 		}
 	};
+	*/
 };
 
 
