@@ -4,7 +4,7 @@
  *
  * @see https://www.mapbox.com/mapbox-gl-js/api/
  * @see https://github.com/mapbox/mapbox-gl-js
- * At time of writing v0.33.1
+ * At time of writing v0.34.0
  *
  * @author Fredrik Blomqvist
  *
@@ -80,6 +80,7 @@ api.createMapBoxGL = function(container, center, opt) {
 			if (opt.showNavigation) {
 				map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 			}
+			// todo: also use: sniff.hasGeolocation() && sniff.isSecureDomain()
 			if (opt.showGeolocation) {
 				// note that geolocation button apparently resets the pitch
 				map.addControl(new mapboxgl.GeolocateControl(), 'top-right');
