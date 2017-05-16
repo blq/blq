@@ -124,13 +124,12 @@ var store = {
 	// if callback returns 'false' breaks the loop (following jQuery's each-convention).
 	// todo: or split in two? each(key, value) & eachKey(key) ?
 	// -> or use the new ES6 iteration instead!
-	// todo: expose a 'thisArg'?
-	each: function(callback) {
+	each: function(callback, thisArg) {
 		// ! always iterate backwards. Then both add and remove(of current elem) can be done by the callback in the loop.
 		for (var i = store._storage.length - 1; i >= 0; --i) {
 			var key = store._storage.key(i);
 			// todo: value? do callback(key, val)
-			var ret = callback(key);
+			var ret = callback.call(thisArg, key);
 			if (ret === false)
 				break;
 		}
