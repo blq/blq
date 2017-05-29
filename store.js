@@ -7,8 +7,9 @@
  *
  * Exposes an ES6 iterator and MochiKit.Iterator if available.
  *
- * todo: set/getCompressed? (using the LZ lib)
  * todo: namespaces? store.getNamespace(namespace) -> a store.get/set API but behind a namespace?!
+ * todo: out-of-mem exception handling?
+ * todo: set/getCompressed? (using the LZ lib)
  *
  * @author Fredrik Blomqvist
  *
@@ -119,11 +120,16 @@ var store = {
 		return key in store._storage;
 	},
 
-	// note that callback only gets the key id. Assumed to grab the value manually if needed.
-	// for performance reasons (json serialization) (ok? worth it?). (passing the index would be of little use).
-	// if callback returns 'false' breaks the loop (following jQuery's each-convention).
-	// todo: or split in two? each(key, value) & eachKey(key) ?
-	// -> or use the new ES6 iteration instead!
+	/**
+	 * note that callback only gets the key id. Assumed to grab the value manually if needed.
+	 * for performance reasons (json serialization) (ok? worth it?). (passing the index would be of little use).
+	 * if callback returns 'false' breaks the loop (following jQuery's each-convention).
+	 * todo: or split in two? each(key, value) & eachKey(key) ?
+	 * -> or use the new ES6 iteration instead!
+	 * @param {Function} callback
+	 * @param {Object=} thisArg
+	 * @return {Function} chained callback
+	 */
 	each: function(callback, thisArg) {
 		// ! always iterate backwards. Then both add and remove(of current elem) can be done by the callback in the loop.
 		for (var i = store._storage.length - 1; i >= 0; --i) {
