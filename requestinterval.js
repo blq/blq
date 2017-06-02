@@ -20,15 +20,15 @@ var requestInterval = function (fn, delay) {
 			window.setTimeout(callback, 1000 / 60);
 		};
 	})(),
-	start = new Date().getTime(),
+	start = Date.now(),
 	handle = {};
 	function loop() {
 		handle.value = requestAnimFrame(loop);
-		var current = new Date().getTime(),
+		var current = Date.now(),
 		delta = current - start;
 		if (delta >= delay) {
 			fn.call();
-			start = new Date().getTime();
+			start = Date.now();
 		}
 	}
 	handle.value = requestAnimFrame(loop);
@@ -70,10 +70,10 @@ var requestTimeout = function (fn, delay) {
 			window.setTimeout(callback, 1000 / 60);
 		};
 	})(),
-	start = new Date().getTime(),
+	start = Date.now(),
 	handle = {};
 	function loop() {
-		var current = new Date().getTime(),
+		var current = Date.now(),
 		delta = current - start;
 		if (delta >= delay) {
 			fn.call();
