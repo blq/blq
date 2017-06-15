@@ -173,6 +173,17 @@ dom.multiDelegate = function(event, delegates) {
 };
 
 
+/**
+ * is object a jQuery object?
+ * @param {*} obj
+ * @return {boolean}
+ */
+dom.isjQuery = function(obj) {
+	// (don't want to use "instanceof jQuery" for easier compilation)
+	return obj != null && typeof obj.jquery == 'string'; // .jquery is the version nr string
+};
+
+
 return dom;
 
 });
