@@ -59,7 +59,8 @@ api.loadTexture = function(url, opt_progress) {
 				resolve(texture);
 			},
 			function onprogress() {
-				if (opt_progress) opt_progress.apply(this, arguments);
+				if (typeof opt_progress == 'function')
+					opt_progress.apply(this, arguments);
 			},
 			function onerror(err) {
 				reject(err);
