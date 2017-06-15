@@ -102,6 +102,7 @@ api.createVideoTexture = function(urlOrStream, options) {
 		video.loop = options.loop;
 		video.autoplay = options.autoplay; // todo: double-check this is correct. If not applied video can be extreemely slow in Chrome(!) (bug??)
 		video.muted = options.muted;
+		// video.playsinline = true; // iOS?
 
 		video.onloadeddata = function(e) {
 			// todo: check if dim are ok? (see webcamtexture) -> onloadedmetadata event!
@@ -141,6 +142,22 @@ api.createVideoTexture = function(urlOrStream, options) {
 
 		return texture;
 	});
+};
+
+
+//----------------------
+
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {Object=} options fps etc. @see createVideoTexture()
+ * @return {THREETexture}
+ */
+api.getCanvasTexture = function(canvas, options) {
+	// todo: too simple impl? worth it?
+	var fps = options.fps || 25;
+	var stream = canvas.captureStream(fps);
+
+	return api.createVideoTexture(stream, options);
 };
 
 
