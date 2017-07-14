@@ -25,9 +25,10 @@ dom.getScopedjQuerySelector = function(root) {
 	// This should be faster and stricter in the sense we want here.
 	// == return MochiKit.Base.method($root, 'find')
 	var $root = $(root);
-	return function(selector) {
-		return $root.find(selector);
-	};
+	return $root.find.bind($root);
+	// return function(selector) {
+	// 	return $root.find(selector);
+	// };
 };
 
 
@@ -138,7 +139,7 @@ dom.getIframeWindow = function(iframe) {
 
 /**
  * umm, name?..
- * @return {Object} handle that can be used to disconnect
+ * @return {!{ dispose: Function }} handle that can be used to disconnect
  */
 dom.onMaybeDelegated = function(elemOrSel, event, fn) {
 	// todo: package as a handler !
