@@ -66,7 +66,7 @@ ns.readFile = function(file, options) {
 
 	return new Promise(function(resolve, reject) {
 		var reader = new FileReader();
-		
+
 		reader.onloadend = function(e) {
 			var data = this.result; // == e.target.result
 
@@ -108,7 +108,7 @@ ns.readFile = function(file, options) {
 		// == blq.ReadFileFormat.*
 		switch (options.output) {
 			case 'text':
-				reader.readAsText(file);
+				reader.readAsText(file); // default is 'UTF8'
 				break;
 
 			case 'binarystring':

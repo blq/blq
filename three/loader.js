@@ -57,10 +57,9 @@ api.loadPromise = function(url, loader, onProgress) {
 
 
 /**
- * todo: option flags to do compute normals, BS etc
- *
  * @param {string} type the type shorthand. i.e 'PLY' etc
  * @param {string} url
+ * @param {{computeFaceNormals: boolean, computeBoundingSphere: boolean}=} options ..
  * @return {!Promise}
  */
 api.loadGeom = function(type, url, options) {

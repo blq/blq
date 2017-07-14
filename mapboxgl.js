@@ -4,7 +4,7 @@
  *
  * @see https://www.mapbox.com/mapbox-gl-js/api/
  * @see https://github.com/mapbox/mapbox-gl-js
- * At time of writing v0.34.0
+ * At time of writing v0.38.0
  *
  * @author Fredrik Blomqvist
  *

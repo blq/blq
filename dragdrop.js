@@ -35,7 +35,7 @@ var blq = {};
  * @param {{output: (blq.ReadFileFormat|string)}?} [options]
  * @param {function({name: string, mimeType: string, data: Object})} callback
  * @param {function(string)=} [errback]
- * @param {function(ProgressEvent)=} [progess] progress callback. todo: merge callbacks?
+ * @param {function(ProgressEvent)=} [progress] progress callback. todo: merge callbacks?
  * // todo: return some kind of handle? (now element)
  */
 blq.listenForDragDrop = function(elem, options, callback, errback, progress) {
