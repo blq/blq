@@ -467,7 +467,6 @@ api.cancelablePromise = function(resolver) {
 };
 
 
-
 /**
  * todo: name? delay()?
  * @param {integer} ms
@@ -516,11 +515,14 @@ api.timeout = function(p, ms, opt_err) {
 
 
 /**
- * get the value of the prmise but don't take part in the chain
+ * get the value of the promise but don't take part in the chain.
  * i.e any exceptions you throw will go into the global scope, not into the pipe. any return value ignored.
  * todo: this for one, would be nice to be a Promise method I guess..
+ * todo: tapCatch also
+ * todo: ! this is not according to Bluebird it seems!
  * @param {!Promise} p
  * @param {Function} callback
+ * // todo: allow third arg 'errback' directly here?
  * @return {!Promise}
  */
 api.tap = function(p, callback) {
@@ -536,23 +538,58 @@ api.tap = function(p, callback) {
 };
 
 
+api.tapCatch = function(p, errback) {
+	p.catch(function(err) {
+		// "lift" call outside the try-catch guard
+		// todo: hmm, could also only move an actual error-throw outside? (i.e re-throw in settimeout)
+		setTimeout(function() {
+			errback(err);
+		}, 0);
+	});
+	// ! don't do single line return p.then() since we don't want to take part in the chain
+	return p;
+};
+
+
+// this is "standards", Bluebird conforming impl. I like it other way when exceptions are visible?
+api._tap = function(p, handler) {
+	return p.then(function(value) {
+		return new Promise(function(resolve) {
+			resolve(handler(value));
+		}).then(function() {
+			return value;
+		});
+	});
+};
+
+api._tapCath = function(p, handler) {
+	return p.catch(function(err) {
+		return new Promise(function(resolve, reject) {
+			reject(handler(err));
+		}).catch(function() {
+			return err;
+		});
+	});
+};
+
+
 /**
  * try-catch-finally analogue
  * @param {!Promise} p
  * @param {!Function} callback gets no input args.
- * @return {!Promise} same as input. Not affeced by callback return/throw
+ * @return {!Promise} same as input. Not affected by callback return/throw
  */
 api.finally = function(p, callback) {
 	var fn = function() {
 		// "lift" call outside the try-catch guard
+		// todo: ok? same reasoning as tap() vs _tap() ideas above
 		setTimeout(function() {
-			callback();
+			callback(); // (can't use directly in setTimeout since many browsers pass an arg to it..)
 		}, 0);
 	};
 
-	p.then(fn, fn);
-
 	// ! don't do single line return p.then() since we don't want to take part in the chain
+	p.then(fn, fn);
 	return p;
 };
 
@@ -648,6 +685,18 @@ api.injectPromiseInDeferred = function(deferred) { // name? makeDeferredThenable
 		return this.then(null, onRejected);
 	};
 
+	// useful? will return a pure Promise
+	mkdp.promise = function() {
+		// return new Promise(this.then.bind(this)); // ok?
+		return Promise.resolve(this); // better?
+
+		// var self = this;
+		// // todo: hmm, other way? this triggers immediately. we want only when user calls then!
+		// return new Promise(function(res, rej) {
+		// 	self.then(res, rej);
+		// });
+	};
+
 	return mkdp;
 };
 
@@ -729,6 +778,26 @@ api.allConsume = function(promises) {
 
 
 /**
+ * similar to allConsume but filters out errors
+ * todo: naming? onlySucces?
+ * todo: same for dictionary case?
+ * @param {!Array<Promise|*>} promises
+ * @return {!Promise} Array of only success (can be shorter than input array of course!)
+ */
+api.allSuccess = function(promises) {
+	return api.allConsume(promises).then(function(result) {
+		return results
+			.filter(function(pair) {
+				return pair[0];
+			})
+			.map(function(pair) {
+				return pair[1];
+			});
+	});
+};
+
+
+/**
  * Assuming input promise returns an array the array is "spread" into individual arguments to callback.
  * Typically used with all()-like methods
  * @param {!Promise} p
@@ -802,14 +871,14 @@ function makeChainable(obj, methods) {
  * creates a wrapper Promise-like object
  * around p that also exposes the method-like
  * functions in this API as methods. allowing easier chained calls.
- * (i.e will look more like Bluebird API for example)
+ * (i.e will look more like the Bluebird API for example)
  *
  * the return Promises of these methods will also be wrapped.
  *
  * todo: convention or registry for the methods to attach?
  * todo: name? "wrap"? "makeMethods?" "extendWith" ?
  * @param {!Promise} p
- * @return {!Promise} but with exposed API from here as chainable methods
+ * @return {!Promise} but with exposed API calls from this lib as chainable methods
  */
 api.wrap = function(p) {
 	// todo: what's "best"? mutate a Promise or store Promise as property in the wrapper?
@@ -817,11 +886,78 @@ api.wrap = function(p) {
 		tap: api.tap,
 		finally: api.finally,
 		timeout: api.timeout,
-		spread: api.spread
+		spread: api.spread,
+		also: api.also
+		// .. more?
 	});
 };
 
 
+// code to run in the async "shadow". i.e run _immediately_ after _dispatch_ of the first step.
+// ! it's an Anti Pattern to do synchronous stuff _before_ the async!
+// typical use is to fire up load-spinner etc
+// observe that this doesn't (by definition can't) care about success/fail of input promise, it just runs.
+// -> or call it 'also'? doAjax().also(showSpinner).then(handleAjax); ?
+api.after = function(p, after) {
+	// silly simple impl :)
+	// but without you'll lose the "flow" and are tempted to add
+	// code *before* the async call!
+
+	// don't let it throw.
+	// call synchronously.
+	try {
+		after();
+	} catch (e) {
+
+	}
+	return p;
+};
+
+// better name? or choose one?
+api.also = api.after;
+
+
+// even more common setup? i.e show spinner if p() takes longer than
+// the delay. i.e the after() call is Not guarateed to run at all.
+api.maybeAfter = function(p, after, delay) {
+	// silly simple impl :)
+	// but without it you lose the "flow" and are tempted to add
+	// code *before* the async call!
+
+	delay = delay || 0; // or set this to a higher "human perceptive instant" value, like 1-2 hundred(s) ms? (i.e before showing a spinner)
+
+	var h = setTimeout(function() {
+		after();
+	}, delay);
+
+	return api.tap(p, function() {
+		clearTimeout(h);
+	});
+};
+
+
+//------ test api style ----
+/*
+var p = ajax(123).then(function() {
+	// asdf asdf
+});
+after_stuff();
+return p;
+
+after(ajax(), function() { show_spinner() }).then(function(ret) {
+	return handle_ajax(ret);
+});
+
+// if injected in promise
+ajax(123)
+	.after(function() {
+		show_spinner();
+	})
+	.then(function(ret) {
+		return handle_ajax(ret);
+	});
+*/
+//---------
 
 return api;
 
