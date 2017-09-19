@@ -60,7 +60,7 @@ ns.readFile = function(file, options) {
 	// assert(file != null);
 
 	options = options || {};
-	options.output = options.output || ns.ReadFileFormat.Base64 // ok default?
+	options.output = options.output || ns.ReadFileFormat.Base64; // ok default?
 	options.progress = options.progress || function() {};
 	// assert(typeof options.output == 'string');
 
