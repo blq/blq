@@ -552,6 +552,7 @@ api.tapCatch = function(p, errback) {
 
 
 // this is "standards", Bluebird conforming impl. I like it other way when exceptions are visible?
+// -> or change "my way" to name it ".bailout()" or something? ;)
 api._tap = function(p, handler) {
 	return p.then(function(value) {
 		return new Promise(function(resolve) {
@@ -575,6 +576,9 @@ api._tapCath = function(p, handler) {
 
 /**
  * try-catch-finally analogue
+ * todo: deprecate once finally becomes part of the Promise standard (Chrome 63)
+ * @see https://github.com/tc39/proposal-promise-finally
+ *
  * @param {!Promise} p
  * @param {!Function} callback gets no input args.
  * @return {!Promise} same as input. Not affected by callback return/throw
@@ -582,7 +586,7 @@ api._tapCath = function(p, handler) {
 api.finally = function(p, callback) {
 	var fn = function() {
 		// "lift" call outside the try-catch guard
-		// todo: ok? same reasoning as tap() vs _tap() ideas above
+		// todo: ok? same reasoning as tap() vs _tap() ideas above.. (seems standard keeps exceptions in the pipe anyway.. hmm)
 		setTimeout(function() {
 			callback(); // (can't use directly in setTimeout since many browsers pass an arg to it..)
 		}, 0);
@@ -872,6 +876,7 @@ function makeChainable(obj, methods) {
  * around p that also exposes the method-like
  * functions in this API as methods. allowing easier chained calls.
  * (i.e will look more like the Bluebird API for example)
+ * (technically we could modify Promise.prototype, but we don't..)
  *
  * the return Promises of these methods will also be wrapped.
  *
@@ -887,7 +892,8 @@ api.wrap = function(p) {
 		finally: api.finally,
 		timeout: api.timeout,
 		spread: api.spread,
-		also: api.also
+		also: api.also,
+		try: api.try
 		// .. more?
 	});
 };
@@ -897,7 +903,7 @@ api.wrap = function(p) {
 // ! it's an Anti Pattern to do synchronous stuff _before_ the async!
 // typical use is to fire up load-spinner etc
 // observe that this doesn't (by definition can't) care about success/fail of input promise, it just runs.
-// -> or call it 'also'? doAjax().also(showSpinner).then(handleAjax); ?
+// -> or call it 'also'? doAjax().also(showSpinner).finally(hideSpinner).then(handleAjax); ?
 api.after = function(p, after) {
 	// silly simple impl :)
 	// but without you'll lose the "flow" and are tempted to add
@@ -918,7 +924,7 @@ api.also = api.after;
 
 
 // even more common setup? i.e show spinner if p() takes longer than
-// the delay. i.e the after() call is Not guarateed to run at all.
+// the delay. i.e the after() call is Not guaranteed to run at all.
 api.maybeAfter = function(p, after, delay) {
 	// silly simple impl :)
 	// but without it you lose the "flow" and are tempted to add
@@ -927,7 +933,7 @@ api.maybeAfter = function(p, after, delay) {
 	delay = delay || 0; // or set this to a higher "human perceptive instant" value, like 1-2 hundred(s) ms? (i.e before showing a spinner)
 
 	var h = setTimeout(function() {
-		after();
+		after(); // (can't inline this due to some browsers' setTimeout sending args to callback..)
 	}, delay);
 
 	return api.tap(p, function() {
@@ -944,7 +950,7 @@ var p = ajax(123).then(function() {
 after_stuff();
 return p;
 
-after(ajax(), function() { show_spinner() }).then(function(ret) {
+after(ajax(), show_spinner).finally(hide_spinner).then(function(ret) {
 	return handle_ajax(ret);
 });
 
@@ -958,6 +964,24 @@ ajax(123)
 	});
 */
 //---------
+
+
+/**
+ * Convenience for both sync and async try-semantic
+ * (sync code will still run in same tick)
+ * Sometimes called 'attempt' or 'when'.
+ * @see https://github.com/tc39/proposal-promise-try
+ *
+ * @param {Function} fn
+ * @return {!Promise}
+ */
+api.try = function(fn) {
+	// (Not same as "return Promise.resolve().then(fn)" would make also sync code run in next tick)
+	return new Promise(function(resolve, reject) {
+		resolve(fn());
+	});
+};
+
 
 return api;
 
