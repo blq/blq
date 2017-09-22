@@ -814,6 +814,7 @@ api.spread = function(p) {
 	sp.then = function(callback, errback) {
 		return _then.call(sp,
 			function(arr) {
+				// todo: could sniff for Array? (though a hard requirement is mostly better I'd say. BB does that)
 				return callback.apply(null, arr);
 			},
 			errback
@@ -892,18 +893,24 @@ api.wrap = function(p) {
 		finally: api.finally,
 		timeout: api.timeout,
 		spread: api.spread,
-		also: api.also,
+		also: api.also, // == after
+		maybeAfter: api.maybeAfter,
 		try: api.try
 		// .. more?
 	});
 };
 
 
-// code to run in the async "shadow". i.e run _immediately_ after _dispatch_ of the first step.
-// ! it's an Anti Pattern to do synchronous stuff _before_ the async!
-// typical use is to fire up load-spinner etc
-// observe that this doesn't (by definition can't) care about success/fail of input promise, it just runs.
-// -> or call it 'also'? doAjax().also(showSpinner).finally(hideSpinner).then(handleAjax); ?
+/**
+ * code to run in the async "shadow". i.e run _immediately_ after _dispatch_ of the first step.
+ * ! it's an Anti Pattern to do synchronous stuff _before_ the async!
+ * typical use is to fire up load-spinner etc
+ * observe that this doesn't (by definition can't) care about success/fail of input promise, it just runs.
+ * -> or call it 'also'? doAjax().also(showSpinner).finally(hideSpinner).then(handleAjax); ?
+ * @param {!Promise} p
+ * @param {function} after
+ * @return {!Promise}
+ */
 api.after = function(p, after) {
 	// silly simple impl :)
 	// but without you'll lose the "flow" and are tempted to add
@@ -919,25 +926,32 @@ api.after = function(p, after) {
 	return p;
 };
 
-// better name? or choose one?
+// better name? next?
 api.also = api.after;
 
 
-// even more common setup? i.e show spinner if p() takes longer than
-// the delay. i.e the after() call is Not guaranteed to run at all.
+/**
+ * even more common setup? i.e show spinner if p() takes longer than
+ * the delay. i.e the after() call is Not guaranteed to run at all.
+ * @param {!Promise} p
+ * @param {function} after
+ * @param {integer=} delay ms. default 50
+ * @return {!Promise}
+ */
 api.maybeAfter = function(p, after, delay) {
 	// silly simple impl :)
 	// but without it you lose the "flow" and are tempted to add
 	// code *before* the async call!
 
-	delay = delay || 0; // or set this to a higher "human perceptive instant" value, like 1-2 hundred(s) ms? (i.e before showing a spinner)
+	delay = typeof delay == 'number' ? delay : 50;
 
 	var h = setTimeout(function() {
+		h = null;
 		after(); // (can't inline this due to some browsers' setTimeout sending args to callback..)
 	}, delay);
 
 	return api.tap(p, function() {
-		clearTimeout(h);
+		if (h) clearTimeout(h);
 	});
 };
 
