@@ -10,7 +10,7 @@ var text = {};
 
 /**
  * @see https://github.com/bevacqua/fuzzysearch
- * similar to, but faster, than the Levenshtein distance based algo (see MochikIt.Text-ext)
+ * similar to, but faster, than the Levenshtein distance based algo (see MochiKit.Text-ext)
  *
  * @param {string} needle
  * @param {string} haystack
