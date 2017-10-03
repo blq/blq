@@ -83,8 +83,7 @@ dbc.addDBC = function(cls) {
 				cls[k] = aop.after(m, post);
 			}
 		}
-
-	};
+	}
 };
 
 
