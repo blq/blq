@@ -11,7 +11,7 @@
  *
  * todo: not quite ready, needs more IRL use..
  */
-define(['blq/aop'], fuction(aop) {
+define(['blq/aop'], function(aop) {
 
 // namespace
 var dbc = {};
