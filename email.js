@@ -47,7 +47,7 @@ mail.createEmailUrl = function(email, subject, body) {
 	// create a format string (doing it in one step with empty placeholders kindof works but clutters the url so much)
 	// add mail last thing (see below)
 	// (we Don't use $.param() or MK.queryString() since we care about the ordering (array versions could work but then special cases anyway. And encoding))
-	var template = format('{cc}{bcc}{subject}{body}', {
+	var template = MochiKit.Text.format('{cc}{bcc}{subject}{body}', {
 		cc: arg.cc ? '&cc={cc}' : '',
 		bcc: arg.bcc ? '&bcc={bcc}' : '',
 		subject: arg.subject ? '&subject={subject}' : '',
@@ -61,7 +61,7 @@ mail.createEmailUrl = function(email, subject, body) {
 		template = '{email}' + template;
 	}
 
-	var url = 'mailto:' + format(template, arg);
+	var url = 'mailto:' + MochiKit.Text.format(template, arg);
 	return url;
 };
 
