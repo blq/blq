@@ -643,7 +643,7 @@ getConnection = function() {
 		// use custom code to close/dispose
 		conn.close();
 	});
-}
+};
 
 using(getConnection(), function(conn) {
 	use_connection(conn);
@@ -691,14 +691,7 @@ api.injectPromiseInDeferred = function(deferred) { // name? makeDeferredThenable
 
 	// useful? will return a pure Promise
 	mkdp.promise = function() {
-		// return new Promise(this.then.bind(this)); // ok?
-		return Promise.resolve(this); // better?
-
-		// var self = this;
-		// // todo: hmm, other way? this triggers immediately. we want only when user calls then!
-		// return new Promise(function(res, rej) {
-		// 	self.then(res, rej);
-		// });
+		return Promise.resolve(this); // Promise resolve is guaranteed to cast "thenables"
 	};
 
 	return mkdp;
