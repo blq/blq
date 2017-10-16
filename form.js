@@ -74,7 +74,8 @@ form.onSubmitJSON = function(formSelector, callback, block) {
 };
 
 /**
- * @param {boolean=} [enable]
+ * @param {HTMLFormElement|jQuerySelector}
+ * @param {boolean} enable
  */
 form.toggleForm = function(form, enable) {
 	form = $(form);

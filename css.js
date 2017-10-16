@@ -8,7 +8,7 @@
 define(['blq/assert', 'jquery', 'MochiKit/Iter', 'MochiKit/Iter-ext'], function(assert, $) {
 
 // namespace
-var css = {}
+var css = {};
 
 /**
  * load and add CSS to the current document.

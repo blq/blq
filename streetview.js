@@ -57,7 +57,7 @@ street.getStreetviewImageCubeUrls = function(latlng, options) {
 	};
 
 	for (var side in cube) {
-		var url = format(fmt, {
+		var url = MochiKit.Text.format(fmt, {
 			size: options.size,
 			pos: latlng,
 			heading: cube[side].h,
