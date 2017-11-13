@@ -50,6 +50,7 @@ blq.openWindow = function(url, title, options, optWin) {
 	console.debug('Opening window "%s" with args: "%s"', url, strWinSettings);
 
 	var srcWin = optWin || window;
+	// todo: 'title' not really correct here mustn't contain whitespace etc
 	var win = srcWin.open(url, title, strWinSettings);
 	if (win == null) {
 		console.error('Open window "%s" failed. Probably popup-blocker', url);
