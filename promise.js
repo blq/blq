@@ -406,11 +406,12 @@ api.createDeferred = function(executor) {
  * @param {function} fn
  * @return {function(): !Promise}
  */
-api.promisify = function(fn) { // name? makeAsync?
+api.promisify = function(fn) { // name? bindAsync? makeAsync?
 	// todo: maybe detect if already promisified? (add a tag?)
 	return function() {
-		return Promise.all(arguments).then(function(rets) {
-			return fn.apply(null, rets);
+		var self = this;
+		return Promise.all(arguments).then(function(args) {
+			return fn.apply(self, args);
 		});
 	};
 };
@@ -475,7 +476,7 @@ api.cancelablePromise = function(resolver) {
 api.wait = function(ms) {
 	return new Promise(function(resolve, reject) {
 		// have to wrap resolve() once to guard against
-		// the (non standard..) args to setTimeout some browsers send.
+		// the (non standard..) args to setTimeout some browsers send. (todo: hmm, long time ago.. ok now?)
 		setTimeout(function() { resolve(); }, ms);
 	});
 };
@@ -601,8 +602,8 @@ api.finally = function(p, callback) {
 // test. inspired by Bluebird
 // todo: custom teardown method/function? (simply use/assume (goog.)IDisposable ?)
 api.using = function(disposable, fn) {
-	assert(typeof disposable.promise == 'function');
-	assert(typeof disposable.dispose == 'function');
+	// assert(typeof disposable.promise == 'function');
+	// assert(typeof disposable.dispose == 'function');
 
 	return disposable.promise()
 		.then(fn)
