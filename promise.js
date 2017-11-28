@@ -991,6 +991,17 @@ api.try = function(fn) {
 };
 
 
+/**
+ * typical use to enable chained return (waiting) but where no data is wanted to "leak" out.
+ * @param {!Promise} p
+ */
+api.mute = function(p) {
+	return p.then(function() {
+		// NOP
+	});
+};
+
+
 return api;
 
 });
