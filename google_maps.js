@@ -52,7 +52,7 @@ api._loadGoogleMaps = function(key) {
 /**
  * Caches and handles-races.
  * lock ensures no race can occur
- * @param {string} key ! Assumes you only use one key per session (don't think Google can run mutliple keys in same tab anyway?)
+ * @param {string} key ! Assumes you only use one key per session (don't think Google can run multiple keys in same tab anyway?)
  * @return {!Promise}
  */
 api.loadGoogleMaps = promise.lockPromiseCall(api._loadGoogleMaps);
