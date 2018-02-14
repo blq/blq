@@ -231,7 +231,7 @@ api.lockPromiseCall = function(fn) {
 	var p = null;
 	return function() {
 		if (p == null) {
-			// invoke
+			// invoke (todo: should we wrap call in Promise? or assume that is its own responsibility to not throw?)
 			p = fn.apply(this, arguments);
 			// only when resolved/rejected do we allow next call
 			// todo: hmm, could argue that if fn _doesn't_ return
@@ -504,7 +504,8 @@ api.timeout = function(p, ms, opt_err) {
 					clearTimeout(th);
 					resolve(ret);
 				}
-			}, function(err) {
+			},
+			function(err) {
 				if (th != null)	{
 					clearTimeout(th);
 					reject(err);
@@ -856,10 +857,10 @@ function bindTo(obj, methods) {
 function makeChainable(obj, methods) {
 	for (var k in methods) {
 		var fn = methods[k].bind(null, obj);
-		obj[k] = function() {
+		obj[k] = function(bfn) {
 			// re-bind
-			return makeChainable(fn.apply(null, arguments), methods);
-		};
+			return makeChainable(bfn.apply(null, arguments), methods);
+		}.bind(null, fn);
 	}
 	return obj;
 }
@@ -998,6 +999,66 @@ api.try = function(fn) {
 api.mute = function(p) {
 	return p.then(function() {
 		// NOP
+	});
+};
+
+
+/**
+ * todo: variant that pipes output->input through the fn chain? (api.pipeCalls?)
+ * @param {Array<function>} asyncFnQueue
+ * @return {!Promise}
+ */
+api.chainCalls = function(asyncFnQueue) {
+	// fold wrapper fn calls into a single callback
+	var fn0 = asyncFnQueue.shift(); // could use a first Null/NOP-object method also I guess
+	fn0 = api.try(fn0); // actually only need to wrap the first function like this, since all calls will be piped through its deferred
+
+	return asyncFnQueue.reduce(
+		function(accFn, item) {
+			return function(r) {
+				return accFn(r).then(
+					function(res) { return item(res); } // ok? or make piping the results optional? and/or pipe only if != undefined? (as callbacks now do)
+				);
+			};
+		},
+		fn0
+	);
+};
+
+
+/**
+ * not quite ready!
+ * retry a fn a number of times before giving up.
+ * todo: or call "retryUntil?" (let another fn decide to continue or not (and implicitly give delay?))
+ * @param {function(): !Promise} tryFn
+ * @param {(integer|Object)=} opt number of retries or options with delays etc. todo:
+ * @return {!Promise}
+ */
+api.retry = function(tryFn, opt) {
+	// basic principle catch->retry.
+	// todo: any nr of times etc
+	// return tryFn().catch(function() {
+	// 	return tryFn();
+	// });
+
+	var sleep = opt.sleep || 500;
+	var numTries = opt.numTries || -1; // -1 == never stop
+
+	return new Promise(function(resolve) {
+
+		var n = opt.numTries;
+
+		var test = function() {
+			tryFn()
+				.then(resolve)
+				.catch(function(err) {
+					if (numTries < 0 || n++ < numTries)
+						setTimeout(test, sleep);
+					else
+						reject(err);
+				});
+		};
+
 	});
 };
 
