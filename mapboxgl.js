@@ -4,7 +4,6 @@
  *
  * @see https://www.mapbox.com/mapbox-gl-js/api/
  * @see https://github.com/mapbox/mapbox-gl-js
- * At time of writing v0.38.0
  *
  * @author Fredrik Blomqvist
  *
@@ -78,17 +77,36 @@ api.createMapBoxGL = function(container, center, opt) {
 		.then(function(map) {
 
 			if (opt.showNavigation) {
-				map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+				// https://www.mapbox.com/mapbox-gl-js/api/#navigationcontrol
+				map.addControl(new mapboxgl.NavigationControl({
+					showZoom: true,
+					showCompass: true
+				}), 'top-left');
 			}
 			// todo: also use: sniff.hasGeolocation() && sniff.isSecureDomain()
 			if (opt.showGeolocation) {
+				// https://www.mapbox.com/mapbox-gl-js/api/#geolocatecontrol
 				// note that geolocation button apparently resets the pitch
-				map.addControl(new mapboxgl.GeolocateControl(), 'top-right');
-			}
+				var geolocateControl = new mapboxgl.GeolocateControl({
+					showUserLocation: true,
+					trackUserLocation: true,
+					positionOptions: {
+						enableHighAccuracy: true
+					}
+				});
+				// todo: in tracking mode we can watch this one too so can move with it for example
+				geolocateControl.on('error', function(pe) {
+					alert('Geolocation error: ' + JSON.stringify(pe));
+				});
+				map.addControl(geolocateControl, 'top-right');			}
 			if (opt.showScale) {
-				map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+				// https://www.mapbox.com/mapbox-gl-js/api/#scalecontrol
+				map.addControl(new mapboxgl.ScaleControl({
+					unit: 'metric' // 'imperial', 'nautical'
+				}), 'bottom-left');
 			}
 			if (opt.showFullscreen) {
+				// https://www.mapbox.com/mapbox-gl-js/api/#fullscreencontrol
 				map.addControl(new mapboxgl.FullscreenControl(), 'bottom-right');
 			}
 
