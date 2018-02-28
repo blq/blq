@@ -1027,7 +1027,6 @@ api.chainCalls = function(asyncFnQueue) {
 
 
 /**
- * not quite ready!
  * retry a fn a number of times before giving up.
  * todo: or call "retryUntil?" (let another fn decide to continue or not (and implicitly give delay?))
  * @param {function(): !Promise} tryFn
@@ -1035,12 +1034,6 @@ api.chainCalls = function(asyncFnQueue) {
  * @return {!Promise}
  */
 api.retry = function(tryFn, opt) {
-	// basic principle catch->retry.
-	// todo: any nr of times etc
-	// return tryFn().catch(function() {
-	// 	return tryFn();
-	// });
-
 	var sleep = opt.sleep || 500;
 	var numTries = opt.numTries || -1; // -1 == never stop
 
@@ -1051,6 +1044,32 @@ api.retry = function(tryFn, opt) {
 				.then(resolve)
 				.catch(function(err) {
 					if (numTries < 0 || numTries-- > 0)
+						setTimeout(test, sleep);
+					else
+						reject(err);
+				});
+		};
+
+		test();
+	});
+};
+
+
+/**
+ * todo: overload with plain retry()? or just complicated?
+ * @param {function(): Promise} tryFn
+ * @param {function(Error): integer} tryAgain return nr of ms until next retry. 0 to stop
+ * @return {!Promise}
+ */
+api.retryUntil = function(tryFn, tryAgain) {
+	return new Promise(function(resolve, reject) {
+
+		var test = function() {
+			tryFn()
+				.then(resolve)
+				.catch(function(err) {
+					var sleep = tryAgain(err);
+					if (sleep > 0)
 						setTimeout(test, sleep);
 					else
 						reject(err);
