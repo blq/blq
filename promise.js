@@ -1044,7 +1044,7 @@ api.retry = function(tryFn, opt) {
 	var sleep = opt.sleep || 500;
 	var numTries = opt.numTries || -1; // -1 == never stop
 
-	return new Promise(function(resolve) {
+	return new Promise(function(resolve, reject) {
 
 		var n = opt.numTries;
 
@@ -1058,6 +1058,8 @@ api.retry = function(tryFn, opt) {
 						reject(err);
 				});
 		};
+
+		test();
 
 	});
 };
