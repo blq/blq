@@ -1046,13 +1046,11 @@ api.retry = function(tryFn, opt) {
 
 	return new Promise(function(resolve, reject) {
 
-		var n = opt.numTries;
-
 		var test = function() {
 			tryFn()
 				.then(resolve)
 				.catch(function(err) {
-					if (numTries < 0 || n++ < numTries)
+					if (numTries < 0 || numTries-- > 0)
 						setTimeout(test, sleep);
 					else
 						reject(err);
@@ -1060,7 +1058,6 @@ api.retry = function(tryFn, opt) {
 		};
 
 		test();
-
 	});
 };
 
