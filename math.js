@@ -177,7 +177,7 @@ math.ceilMag = function(v) {
 };
 
 /**
- * @deprecated use Math.trun()
+ * @deprecated use Math.trunc()
  * rounds towards zero, regardless of sign (based on magnitude).
  *
  * @see math.ceilMag for rounding away fom zero.

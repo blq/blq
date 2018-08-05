@@ -1,6 +1,6 @@
 /**
  * @fileoverview
- * form related helpers
+ * <form> related helpers
  *
  * @author Fredrik Blomqvist
  *

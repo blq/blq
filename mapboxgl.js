@@ -83,6 +83,7 @@ api.createMapBoxGL = function(container, center, opt) {
 					showCompass: true
 				}), 'top-left');
 			}
+
 			// todo: also use: sniff.hasGeolocation() && sniff.isSecureDomain()
 			if (opt.showGeolocation) {
 				// https://www.mapbox.com/mapbox-gl-js/api/#geolocatecontrol
@@ -98,13 +99,16 @@ api.createMapBoxGL = function(container, center, opt) {
 				geolocateControl.on('error', function(pe) {
 					alert('Geolocation error: ' + JSON.stringify(pe));
 				});
-				map.addControl(geolocateControl, 'top-right');			}
+				map.addControl(geolocateControl, 'top-right');
+			}
+
 			if (opt.showScale) {
 				// https://www.mapbox.com/mapbox-gl-js/api/#scalecontrol
 				map.addControl(new mapboxgl.ScaleControl({
 					unit: 'metric' // 'imperial', 'nautical'
 				}), 'bottom-left');
 			}
+
 			if (opt.showFullscreen) {
 				// https://www.mapbox.com/mapbox-gl-js/api/#fullscreencontrol
 				map.addControl(new mapboxgl.FullscreenControl(), 'bottom-right');
