@@ -8,8 +8,7 @@
  *
  * todo: drop the Promise-polyfill? all relevant platforms support it ok now
  * todo: drop all jQuery stuff once we move to jQuery 3 that has real A+ Promises (hmm, but still the jQ.Deferred object stuff??)
- * todo: Bluebird and Q stuff?
- * todo: async-memoizer etc
+ * todo: async-memoizer, cache etc
  * todo: rename async.js?
  *
  * @author Fredrik Blomqvist
@@ -475,15 +474,17 @@ api.cancelablePromise = function(resolver) {
  */
 api.wait = function(ms) {
 	return new Promise(function(resolve, reject) {
-		// have to wrap resolve() once to guard against
-		// the (non standard..) args to setTimeout some browsers send. (todo: hmm, long time ago.. ok now?)
-		setTimeout(function() { resolve(); }, ms);
+		setTimeout(resolve, ms);
 	});
 };
+
+// alias
+api.delay = api.wait;
 
 
 /**
  * waits ms for p then turns into error
+ * todo: hmm, would it be reasonable to merge(overload) wait & timeout?
  * @param {!Promise} p
  * @param {integer} ms
  * @param {*=} opt_err
@@ -520,7 +521,6 @@ api.timeout = function(p, ms, opt_err) {
  * get the value of the promise but don't take part in the chain.
  * i.e any exceptions you throw will go into the global scope, not into the pipe. any return value ignored.
  * todo: this for one, would be nice to be a Promise method I guess..
- * todo: tapCatch also
  * todo: ! this is not according to Bluebird it seems!
  * @param {!Promise} p
  * @param {Function} callback
@@ -565,7 +565,7 @@ api._tap = function(p, handler) {
 	});
 };
 
-api._tapCath = function(p, handler) {
+api._tapCatch = function(p, handler) {
 	return p.catch(function(err) {
 		return new Promise(function(resolve, reject) {
 			reject(handler(err));
@@ -890,7 +890,8 @@ api.wrap = function(p) {
 		spread: api.spread,
 		also: api.also, // == after
 		maybeAfter: api.maybeAfter,
-		try: api.try
+		try: api.try,
+		tapCatch: api._tapCatch,
 		// .. more?
 	});
 };
@@ -942,7 +943,7 @@ api.maybeAfter = function(p, after, delay) {
 
 	var h = setTimeout(function() {
 		h = null;
-		after(); // (can't inline this due to some browsers' setTimeout sending args to callback..)
+		after();
 	}, delay);
 
 	return api.tap(p, function() {
@@ -1029,12 +1030,13 @@ api.chainCalls = function(asyncFnQueue) {
 /**
  * retry a fn a number of times before giving up.
  * todo: or call "retryUntil?" (let another fn decide to continue or not (and implicitly give delay?))
+ * todo: could implement this using retryUntil instead I guess
  * @param {function(): !Promise} tryFn
  * @param {(integer|Object)=} opt number of retries or options with delays etc. todo:
  * @return {!Promise}
  */
 api.retry = function(tryFn, opt) {
-	var sleep = opt.sleep || 500;
+	var sleep = opt.sleep || 500; // todo: support progressive longer sleep periods?
 	var numTries = opt.numTries || -1; // -1 == never stop
 
 	return new Promise(function(resolve, reject) {
@@ -1073,13 +1075,81 @@ api.retryUntil = function(tryFn, tryAgain) {
 						setTimeout(test, sleep);
 					else
 						reject(err);
-				});
+				})
+				.catch(reject); // if tryAgain throws
 		};
 
 		test();
 	});
 };
 
+
+/**
+ * allows a function to
+ * todo: hmm, not sure this is still 100% covering a practical case I have..
+ * @param {function(): boolean} fn
+ * @return {function(): Promise}
+ */
+api.triggerOnTrue = function(fn) {
+	return function() {
+		return new Promise(function(resolve, reject) {
+			var ret = fn.apply(this, arguments);
+			if (ret)
+				resolve(ret);
+		});
+	};
+};
+
+
+/**
+ * does 'obj' fulfil the 'Thenable' interface?
+ * i.e defined as simply having a 'then' method
+ *
+ * @param {*} obj
+ * @return {boolean}
+ */
+api.isThenable = function(obj) {
+	return obj && typeof obj.then == 'function';
+};
+
+
+/**
+ * does 'obj' fulfil the Promise interface?
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/prototype
+ *
+ * @param {*} obj
+ * @return {boolean}
+ */
+api.isPromise = function(obj) {
+	return (
+		obj &&
+		typeof obj.then == 'function' &&
+		typeof obj.catch == 'function' &&
+		typeof obj.finally == 'function'
+	);
+};
+
+
+/**
+ * does 'obj' fulfil the MochiKit.Async.Deferred interface?
+ * http://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred
+ *
+ * @param {*} obj
+ * @return {boolean}
+ */
+api.isDeferred = function(obj) {
+	return (
+		obj &&
+		typeof obj.addCallbacks == 'function' &&
+		typeof obj.addCallback == 'function' &&
+		typeof obj.addErrback == 'function' &&
+		typeof obj.addBoth == 'function' &&
+		typeof obj.state == 'function' &&
+		typeof obj.fired == 'number'
+	);
+};
+
+// todo: api.isjQueryDeferred() ?
 
 return api;
 
