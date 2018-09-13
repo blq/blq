@@ -10,7 +10,7 @@
  * @author Fredrik Blomqvist
  *
  */
-define(['blq/assert', 'MochiKit/Text'], function(assert) {
+define(['MochiKit/Text'], function() {
 
 // namespace
 var street = {};
@@ -26,7 +26,7 @@ var street = {};
  * @return {!{ left: string, front: string, right: string, back: string, top: string, down: string }} cubemap image urls
  */
 street.getStreetviewImageCubeUrls = function(latlng, options) {
-	assert(blq.isLatLngLike(latlng));
+	// assert(blq.isLatLngLike(latlng));
 
 	// todo: more options? initial angle etc
 	options = Object.assign({
