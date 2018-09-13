@@ -575,6 +575,58 @@ api._tapCatch = function(p, handler) {
 	});
 };
 
+// another interesting variant that is inteded to be inserted
+// in a plain p.then(inlineTap(console.log)).then(..). see https://github.com/sindresorhus/p-tap
+// todo: maybe enable this kind of inline-API for more functions!?
+api.inlineTap = function(handler) {
+	return function(value) {
+		var ret = function() { return value; };
+		return Promise.resolve(value)
+			.then(handler)
+			.then(ret);
+	};
+};
+
+api.inlineTapCatch = function(handler) {
+	return function(err) {
+		var ret = function() { return Promise.reject(err); };
+		return Promise.resolve(err)
+			.then(handler)
+			.then(ret);
+	};
+};
+
+// experiment. doesn't work for all our methods but many.
+// p.then(inline(timeout, 1000)).then(..)
+api.inline = function(apiFn, ...args) {
+	return function(val) {
+		var p = Promise.resolve(value);
+		return apiFn.bind(api, p, ...args)();
+	};
+};
+
+// typically intended to be a pipe-through for an immediately executed function
+// p.then(pipe(console.log('I run now!'))).then(..)
+// todo: hmm, Promise.then(x) actually says that if 'x' is Not a function it should be ignored. I.e get this behavior for free!
+api.pipe = function(ignored) {
+	// identity fn
+	return function(p) {
+		return p;
+	};
+};
+
+/**
+ * can be used to wrap a value into a chain.
+ * p.then(value(123)).then(..)
+ * @param {*} val
+ * @return {function(): *}
+ */
+api.value = function(val) {
+	return function() {
+		return val;
+	};
+};
+
 
 /**
  * try-catch-finally analogue
