@@ -8,6 +8,7 @@
  *
  * @author Fredrik Blomqvist
  *
+ * @ts-check
  */
 define(['blq/util'], function(util) {
 
@@ -42,7 +43,7 @@ worker.isInlineWebWorkerSupported = function() {
  * @return {?string} can be fed directly to the Worker constructor. null if not supported
  */
 worker._createInlineWebWorkerURL = function(fnJs)  {
-	assert(fnJs != null); // typically a function but with a string we have full freedom. see blq.makeFnWorkerAsync for example
+	// assert(fnJs != null); // typically a function but with a string we have full freedom. see blq.makeFnWorkerAsync for example
 
 	if (!worker.isInlineWebWorkerSupported()) {
 		console.error('Inline Web Worker not supported');
@@ -98,7 +99,7 @@ worker._createInlineWebWorkerURL = function(fnJs)  {
  * @see worker.makeFnWorkerAsync() for simpler run-once case.
  *
  * todo: helper to import other scripts?
- * todo: timeouts/cancel? altough best is to handle that externally, the es6 Promise don't support it, thus maybe inject?.. (MK, Bluebird etc can cancel..)
+ * todo: timeouts/cancel? although best is to handle that externally, the es6 Promise don't support it, thus maybe inject?.. (MK, Bluebird etc can cancel..)
  *
  * @param {function()|string} js worker code. Must not use 'this', use 'self' instead. And of course not assume any other outside references!
  * @return {Worker} null if not supported. Use 'worker.postMessage(params)' to start and send messages. Use 'worker.onmessage = callback' (or addEventListener) to receive data.
@@ -140,7 +141,7 @@ worker.createInlineWebWorker = function(js) {
  * @return {function(): !Deferred} function has same signature as input fn, but returns Deferred. Deferred will also have '.worker' property for access
  */
 worker.makeFnWorkerAsync = function(fn) {
-	assert(typeof fn == 'function');
+	// assert(typeof fn == 'function');
 
 	var workerJs = 'self.onmessage = function(e) { self.postMessage(('+fn.toString()+').apply(self, e.data)) }';
 	// todo: better to create url once up-front, but never call revokeObjectURL. Or create once per call and use 'revokeObjectURL' directly?
@@ -190,7 +191,7 @@ worker.makeFnWorkerAsync = function(fn) {
  * @return {function(): !Promise} Promise will have '.worker' as a property
  */
 worker.makeFnWorkerPromise = function(fn) {
-	assert(typeof fn == 'function');
+	// assert(typeof fn == 'function');
 
 	var workerJs = 'self.onmessage = function(e) { self.postMessage(('+fn.toString()+').apply(self, e.data)) }';
 	// todo: or create and destroy the url also per call? this will live long now(?) (or will GC understand cleanup?)
@@ -238,7 +239,7 @@ worker.makeFnWorkerPromise = function(fn) {
  * @return {function(): !Deferred} function will have property '.worker' (! the function, Not the Deferred, contrary to makeFnWorkerAsync)
  */
 worker.makeFnWorkerAsyncOnce = function(fn) {
-	assert(typeof fn == 'function');
+	// assert(typeof fn == 'function');
 
 	// inject a uid each call so we can match with the corresponding event-handler
 	// (since we use a single worked we have to attach multiple listeners using addEventListener)
@@ -287,6 +288,146 @@ worker.makeFnWorkerAsyncOnce = function(fn) {
 	workerFn.worker = w;
 
 	return workerFn;
+};
+
+
+/**
+ * JSON.parse() but from within worker
+ * @param {string} str
+ * @return {!Promise}
+ */
+woker.parseJSON = function(str) {
+	// this impl assumes worker creation is fast, instead hopes the inline string avoids message-transfer cost
+	// todo: try posting the string also (plain string should be fast?) then we could cache the worker itself also
+	return new Promise(function(resolve, reject) {
+		//	var workerJs = 'self.onmessage = function(e) { self.postMessage(JSON.parse(e.data)) }';
+		var workerJs = 'self.postMessage(JSON.parse('+str+'))'; // do we have to wait for post? no?
+
+		var workerUrl = Franson.Worker._createInlineWebWorkerURL(workerJs);
+		var worker = new Worker(workerUrl);
+
+		worker.onmessage = function(e) {
+			worker.terminate();
+			resolve(e.data);
+		};
+		worker.onerror = function(e) {
+			worker.terminate();
+			reject(e);
+		};
+
+		// worker.postMessage(str);
+	});
+};
+
+/**
+ * eval() / "new Function(..)" but from within a worker
+ * @param {string} str
+ * @return {!Promise}
+ */
+worker.evalFunction = function(str) {
+	// this impl assumes worker creation is fast, instead hopes the inline string avoids message-transfer cost
+	// todo: try posting the string also (plain string should be fast?) then we could cache the worker itself also
+	// (in that case we could create a single worker for both parseJSON and evalFunction)
+	return new Promise(function(resolve, reject) {
+		//	var workerJs = 'self.onmessage = function(e) { self.postMessage(JSON.parse(e.data)) }';
+		var workerJs = 'self.postMessage((new Function("return '+str+'"))())'; // do we have to wait for post? no?
+
+		var workerUrl = Franson.Worker._createInlineWebWorkerURL(workerJs); // todo: GC this?
+		var worker = new Worker(workerUrl);
+
+		worker.onmessage = function(e) {
+			worker.terminate();
+			resolve(e.data);
+		};
+		worker.onerror = function(e) {
+			worker.terminate();
+			reject(e);
+		};
+
+		// worker.postMessage(str);
+	});
+};
+
+
+worker._parser = null;
+worker._parser_call = 0; // uid counter
+
+worker._parse = function(type, str) {
+	if (!worker._parser) {
+		worker._parser = worker.createInlineWebWorker(`
+			self.onmessage = function(e) {
+				// must try-catch since we can't match onError with the call otherwise
+				try {
+					var obj = undefined;
+
+					switch (e.data.type) {
+						case 'json':
+							obj = JSON.parse(e.data.str);
+							break;
+						case 'eval':
+							obj = eval('('+e.data.str+')');
+							break;
+						case 'func':
+							obj = new Function('return '+e.data.str)();
+							break;
+						default:
+							type = 'error'; //ok? (or add another property?)
+							obj = 'error: invalid parser type';
+							break;
+					}
+
+					self.postMessage({
+						uid: uid, // fwd uid to match at call-site
+						type: type, // implicit, but fwd anyway
+						obj: obj
+					});
+
+				} catch(ex) {
+					self.postMessage({
+						uid: uid,
+						type: 'error',
+						obj: 'error: exception'
+					});
+				}
+			}
+		`);
+	}
+
+	return new Promise(function(resolve, reject) {
+
+		// uid must be used to match individual calls (since worker is shared/reused!)
+		var uid = worker._parser_call++;
+
+		function onMessage(e) {
+			if (e.data.uid != uid)
+				return;
+
+			worker._parser.removeEventListener(onMessage, false);
+
+			if (e.data.type == 'error') {
+				reject(e.data.obj);
+			} else {
+				resolve(e.data.obj);
+			}
+		}
+
+		// we can't match onerror I think (?) hmm, try->catch->inject uid->rethrow?
+		// function onError(err) {
+		// 	worker._parser.removeEventListener(onError, false);
+		// 	reject(err);
+		// }
+
+		worker._parser.addEventListener('message', onMessage, false);
+		// worker._parser.addEventListener('error', onError, false);
+
+		// todo: ! TextEncoder & TextDecoder to move the string inside a trasferrable ArrayBuffer! (2nd arg to postMessage)
+		// (but we'd loose IE & Edge.. https://caniuse.com/#feat=textencoder)
+		worker._parser.postMessage({
+			uid: uid,
+			type: type,
+			str: str
+		});
+	});
 };
 
 
