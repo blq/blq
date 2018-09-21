@@ -1,6 +1,6 @@
 /**
  * @fileoverview
- * quick *experimental test* to use WeakMap to get "free" GC of observer pattern stuff and
+ * Quick *experimental test* to use WeakMap to get "free" GC of observer pattern stuff and
  * Map and Set for fast lookup
  *
  * API inspired by MochiKit.Signal http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html
@@ -10,8 +10,8 @@
  * maybe this one? https://github.com/Financial-Times/polyfill-service/tree/master/polyfills/WeakMap
  *
  * todo: support __connect__/__disconnect__ interceptors? (or use Symbols?)
- * todo: namespace support?
- * note: doesn't support the DOM-overload like MochiKit did (think should be other module)
+ * todo: signal namespace support?
+ * note: doesn't support the DOM-overload like MochiKit (think such should be other module)
  *
  */
 
@@ -21,7 +21,7 @@ var api = {};
 
 // weakmap of dictionaries of signalnames->handlers
 // todo: let's hope GC is eager enough to clean up to not cause clogging anyway..
-// (sometimes veery slow!?)
+// (sometimes veery long time before cleanup!?)
 var store = new WeakMap();
 var destStore = new WeakMap();
 
@@ -36,6 +36,7 @@ var destStore = new WeakMap();
 
 
 /**
+ * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-connect
  * @param {Object} obj
  * @param {string} sig
  * @param {function} fn
@@ -90,6 +91,9 @@ api.connect = function(obj, sig, destOrFn, fn) {
 // to call disconnect at teardowns. This is now only needed if
 // you need to disconnect during use, before a teardown. (and symmetry)
 
+/***
+ * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnectall
+ */
 api.disconnectAll = function(handle, ...signals) {
 	if (signals.length > 0) {
 		var m = store.get(handle.obj);
@@ -104,7 +108,9 @@ api.disconnectAll = function(handle, ...signals) {
 	}
 };
 
-
+/**
+ * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnect
+ */
 api.disconnect = function(handle) {
 	var m = store.get(handle.obj); // Map
 	if (!m) return;
@@ -132,7 +138,9 @@ api.disconnect = function(handle) {
 	}
 };
 
-
+/**
+ * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnectallto
+ */
 api.disconnectAllTo = function(dest) {
 	var handles = destStore.get(dest);
 	if (!handles) return;
@@ -142,6 +150,7 @@ api.disconnectAllTo = function(dest) {
 
 
 /**
+ * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-signal
  * @param {Object} obj
  * @param {string} sig
  * @param {*} args optional
@@ -160,7 +169,7 @@ api.signal = function(obj, sig, ...args) {
 			callback.call(obj, ...args); // observe that callback might have been bound to 'dest' in connect
 		} catch (ex) {
 			console.error('signal:', ex); // maybe not log in production..
-			// buffering exceptions as MK does (or possible to throw and loop somehow?)
+			// buffering exceptions as MK does
 			errors.push(ex);
 		}
 	});
@@ -173,6 +182,21 @@ api.signal = function(obj, sig, ...args) {
         e.errors = errors;
         throw e;
 	}
+};
+
+/**
+ * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnectallfromto
+ * (this is only in blq fork)
+ */
+api.disconnectAllFromTo = function(src, dest) {
+	var handles = destStore.get(dest);
+	if (!handles) return;
+	// todo: is this worth more DS to speed up?
+	handles.forEach(function(handle) {
+		if (handle.obj === src) {
+			api.disconnect(handle);
+		}
+	});
 };
 
 
