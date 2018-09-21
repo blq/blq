@@ -33,7 +33,7 @@ api.share = function(title, text, url) {
 			return ret;
 		})
 		.catch((error) => {
-			console.log('Error sharing', error);
+			console.error('Error sharing:', error);
 			throw error;
 		});
 	} else {
