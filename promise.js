@@ -6,10 +6,10 @@
  * @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html
  * @see http://bluebirdjs.com/docs/getting-started.html
  *
- * todo: drop the Promise-polyfill? all relevant platforms support it ok now
  * todo: drop all jQuery stuff once we move to jQuery 3 that has real A+ Promises (hmm, but still the jQ.Deferred object stuff??)
  * todo: async-memoizer, cache etc
  * todo: rename async.js?
+ * todo: async iteration stuff? (basically becomes Bluebird then..)
  *
  * @author Fredrik Blomqvist
  *
@@ -382,7 +382,7 @@ api.createDeferred = function(executor) {
 
 	var d = new MochiKit.Async.Deferred();
 	try {
-		// (named fns just for debuggability)
+		// (named fns for debuggability)
 		executor(
 			function resolve(ret) {
 				d.callback(ret);
@@ -406,7 +406,7 @@ api.createDeferred = function(executor) {
  * @return {function(): !Promise}
  */
 api.promisify = function(fn) { // name? bindAsync? makeAsync?
-	// todo: maybe detect if already promisified? (add a tag?)
+	// todo: maybe detect if already promisified? (add a tag? -> "unpromisify")
 	return function() {
 		var self = this;
 		return Promise.all(arguments).then(function(args) {
@@ -462,7 +462,7 @@ api.cancelablePromise = function(resolver) {
 		_reject = reject;
 		resolver(resolve, reject);
 	});
-	pr.cancel = reject;
+	pr.cancel = _reject;
 	return pr;
 };
 
@@ -539,6 +539,8 @@ api.tap = function(p, callback) {
 	return p;
 };
 
+
+// todo: or call waiting tap tapWait?
 
 api.tapCatch = function(p, errback) {
 	p.catch(function(err) {
@@ -665,6 +667,10 @@ api.using = function(disposable, fn) {
 				// todo: or chain this? (but still return val?)
 				disposable.dispose();
 				return val;
+				// better?
+				// return disposable.dispose().then(function() {
+				// 	return val;
+				// });
 			},
 			function(err) {
 				disposable.dispose();
@@ -674,7 +680,7 @@ api.using = function(disposable, fn) {
 };
 
 
-// similar to bluebird but witout inspection
+// similar to bluebird but without inspection
 // to be fed into using(). Does Not return a Promise
 api.disposer = function(p, dispose) {
 	return {
@@ -862,6 +868,7 @@ api.spread = function(p) {
 		return _then.call(sp,
 			function(arr) {
 				// todo: could sniff for Array? (though a hard requirement is mostly better I'd say. BB does that)
+				// todo: handle non-function callback? (identity wrapper)
 				return callback.apply(null, arr);
 			},
 			errback
@@ -955,6 +962,7 @@ api.wrap = function(p) {
  * typical use is to fire up load-spinner etc
  * observe that this doesn't (by definition can't) care about success/fail of input promise, it just runs.
  * -> or call it 'also'? doAjax().also(showSpinner).finally(hideSpinner).then(handleAjax); ?
+ * todo: hmm, or is this enough?: doAjax().then(inlineTap(showSpinner()).then(handleAjax)
  * @param {!Promise} p
  * @param {function} after
  * @return {!Promise}
@@ -1112,17 +1120,18 @@ api.retry = function(tryFn, opt) {
 /**
  * todo: overload with plain retry()? or just complicated?
  * @param {function(): Promise} tryFn
- * @param {function(Error): integer} tryAgain return nr of ms until next retry. 0 to stop
+ * @param {function(Error, integer=): integer} tryAgain return nr of ms until next retry. 0 to stop (2nd arg is retry-number)
  * @return {!Promise}
  */
 api.retryUntil = function(tryFn, tryAgain) {
 	return new Promise(function(resolve, reject) {
 
+		var n = 0;
 		var test = function() {
 			tryFn()
 				.then(resolve)
 				.catch(function(err) {
-					var sleep = tryAgain(err);
+					var sleep = tryAgain(err, n++);
 					if (sleep > 0)
 						setTimeout(test, sleep);
 					else
@@ -1201,7 +1210,52 @@ api.isDeferred = function(obj) {
 	);
 };
 
-// todo: api.isjQueryDeferred() ?
+
+/**
+ * trigger when browser is in idle mode
+ * https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback
+ * todo: cancel mechanism? (use cancelablePromise?)
+ * todo: do you want to get the return from idle as result? or option to act as pipe?
+ * @param {integer=} timeout ms
+ * @return {!Promise}
+ */
+api.whenIdle = function(timeout) {
+	return new Promise(function(resolve) {
+		window.requestIdleCallback(resolve, timeout);
+	});
+};
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
+ */
+api.RAF = function() {
+	return new Promise(function(resolve) {
+		window.requestAnimationFrame(resolve);
+	});
+};
+
+/**
+ * test inspired by Idle-until-urgent setup https://philipwalton.com/articles/idle-until-urgent/
+ * returns a 'thenable' that if used triggers explicitly, otherwise queued on idle.
+ */
+api.idleUntilUrgent = function(initFn) {
+	var value;
+	// todo: worth it to be able to cancel the idle?
+	api.whenIdle().then(function() {
+		if (value === undefined)
+			value = initFn();
+	});
+
+	return {
+		then: function(callback) {
+			if (value !== undefined) {
+				return callback(value);
+			}
+			return callback(value = initFn());
+		}
+	};
+};
+
 
 return api;
 
