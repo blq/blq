@@ -178,9 +178,9 @@ api.signal = function(obj, sig, ...args) {
 		throw errors[0];
 	} else
 	if (errors.length > 1) {
-        var e = new Error("Multiple errors thrown in handling 'sig', see errors property");
-        e.errors = errors;
-        throw e;
+		var e = new Error("Multiple errors thrown in handling 'sig', see errors property");
+		e.errors = errors;
+		throw e;
 	}
 };
 
@@ -197,6 +197,21 @@ api.disconnectAllFromTo = function(src, dest) {
 			api.disconnect(handle);
 		}
 	});
+};
+
+
+/**
+ * shorthand for a call to disconnectAll() + disconnectAllTo()
+ * typically to be run during teardown in an obj's destructor
+ */
+api.close = function(obj) {
+	if (!obj) return;
+	// api.disconnectAll(obj);
+	// api.disconnectAllTo(obj);
+
+	// slightly more efficient (assuming no __disconnect__ intercept needed)
+	destStore.delete(obj);
+	store.delete(obj);
 };
 
 
