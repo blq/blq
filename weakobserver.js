@@ -34,6 +34,10 @@ var destStore = new WeakMap();
 // WeakMap->Set
 // obj->handles
 
+var __connect__ = Symbol['__connect__'];
+// todo: hmm, disconnect requires more code changes. maybe skip (MK didn't add it until later also I think(?))
+// var __disconnect__ = Symbol['__disconnect__'];
+
 
 /**
  * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-connect
@@ -82,6 +86,12 @@ api.connect = function(obj, sig, destOrFn, fn) {
 			destStore.set(dest, handles);
 		}
 		handles.add(handle);
+	}
+
+	if (obj[__connect__]) {
+		var args = Array.from(arguments);
+		args[0] = handle;
+		obj[__connect__].apply(obj, args);
 	}
 
 	return handle;
@@ -136,6 +146,8 @@ api.disconnect = function(handle) {
 	if (m.size == 0) {
 		store.delete(handle.obj);
 	}
+
+	// todo: worth it to support __disconnect__ intercept? (need to rewrite other disconnectAll etc)
 };
 
 /**
@@ -205,7 +217,6 @@ api.disconnectAllFromTo = function(src, dest) {
  * typically to be run during teardown in an obj's destructor
  */
 api.close = function(obj) {
-	if (!obj) return;
 	// api.disconnectAll(obj);
 	// api.disconnectAllTo(obj);
 
