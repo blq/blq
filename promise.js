@@ -1203,6 +1203,7 @@ api.whenIdle = function(timeout) {
 
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
+ * @return {!Promise}
  */
 api.RAF = function() {
 	return new Promise(function(resolve) {
@@ -1225,10 +1226,29 @@ api.idleUntilUrgent = function(initFn) {
 
 	return {
 		then: function(callback) {
-			if (value !== undefined) {
-				return callback(value);
+			if (value === undefined) {
+				value = initFn();
 			}
-			return callback(value = initFn());
+			return callback(value);
+		}
+	};
+};
+
+
+// variant2 of idleUntilUrgent
+api.promiseIUU = function(init) {
+	var value;
+	var handle = requestIdleCallback(function() {
+		if (value === undefined)
+			value = init();
+	});
+	return {
+		then: function(callback) {
+			if (value === undefined) {
+				cancelIdleCallback(handle);
+				value = init();
+			}
+			return callback(value);
 		}
 	};
 };
