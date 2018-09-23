@@ -3,11 +3,13 @@
  * Quick *experimental test* to use WeakMap to get "free" GC of observer pattern stuff and
  * Map and Set for fast lookup
  *
- * API inspired by MochiKit.Signal http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html
+ * API inspired by MochiKit.Signal https://blq.github.io/mochikit/doc/html/MochiKit/Signal.html
  *
  * todo: possible polyfills? https://github.com/polygonplanet/weakmap-polyfill
  * IE11 might need it. But not sure if possible to get GC in a PF?
  * maybe this one? https://github.com/Financial-Times/polyfill-service/tree/master/polyfills/WeakMap
+ *
+ * todo: worth it to examine signal return values? i.e mimic Boost's combiners? https://www.boost.org/doc/libs/1_68_0/doc/html/signals/tutorial.html#id-1.3.36.4.6.3
  *
  * todo: support __connect__/__disconnect__ interceptors? (or use Symbols?)
  * todo: signal namespace support?
@@ -25,10 +27,16 @@ var api = {};
 var store = new WeakMap();
 var destStore = new WeakMap();
 
+// expose for debug-inspection
+api.__debug = {};
+api.__debug._store = store;
+api.__debug._destStore = destStore;
+
 // setup now is:
 // store:
 // WeakMap->Map->Set
 // obj->signal->callbacks
+// todo: change callbacks-Set into handles-Set?
 
 // destStore:
 // WeakMap->Set
@@ -41,7 +49,7 @@ api.__disconnect__ = Symbol('__disconnect__');
 
 
 /**
- * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-connect
+ * https://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-connect
  * @param {Object} obj
  * @param {string} sig
  * @param {Object|function} destOrFn
@@ -111,7 +119,7 @@ api.connect = function(obj, sig, destOrFn, fn) {
 // you need to disconnect during use, before a teardown. (and symmetry)
 
 /**
- * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnectall
+ * https://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnectall
  * @param {Object} handle
  * @param {...string} signals
  */
@@ -130,7 +138,7 @@ api.disconnectAll = function(handle, ...signals) {
 };
 
 /**
- * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnect
+ * https://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnect
  * @param {Object} handle
  *
  */
@@ -169,8 +177,7 @@ api.disconnect = function(handle) {
 };
 
 /**
- * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnectallto
- * todo: support 2nd arg 'fn' also? (would need to store original function in handler..)
+ * https://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnectallto
  * @param {Object} dest
  * @param {function=} fn
  */
@@ -195,10 +202,11 @@ api.disconnectAllTo = function(dest, fn) {
 
 
 /**
- * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-signal
+ * https://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-signal
  * @param {Object} obj
  * @param {string} sig
  * @param {*} args optional
+ * // todo: hmm, maybe return how many actually listened?
  */
 api.signal = function(obj, sig, ...args) {
 	var m = store.get(obj);
@@ -229,8 +237,27 @@ api.signal = function(obj, sig, ...args) {
 	}
 };
 
+
 /**
- * http://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnectallfromto
+ * test
+ * todo: something like this could actually be useful in API
+ * to avoid dispatching expensive signals if noone is listening (lazy trigger-thing?)
+ * @param {Object} obj
+ * @return {integer}
+ */
+api.numListeners = function(obj) {
+	var m = store.get(obj);
+	if (!m) return 0;
+
+	var callbacks = m.get(sig); // Set
+	if (!callbacks) return 0;
+
+	return callbacks.size;
+};
+
+
+/**
+ * https://blq.github.io/mochikit/doc/html/MochiKit/Signal.html#fn-disconnectallfromto
  * (this is only in blq fork)
  */
 api.disconnectAllFromTo = function(src, dest) {
@@ -256,6 +283,96 @@ api.close = function(obj) {
 	// slightly more efficient (assuming no __disconnect__ intercept needed)
 	destStore.delete(obj);
 	store.delete(obj);
+};
+
+
+/**
+ * memoizes (last) signal value and will trigger it
+ * immediately if late listeners connects.
+ * nice for init-signal: connect(app, 'oninitialized', ..) -> trigger later if app._initialized == true
+ */
+api.signalPersistent = function(obj, sig, ...args) {
+	// todo: bug! must respect if existing connect-function of course! (api to append listeners :) ?)
+	obj[api.__connect__] = function(handle, _sig, ...other) {
+		if (sig === _sig)
+			handle.fn(...args);
+	};
+	api.signal.apply(this, arguments);
+};
+
+
+
+
+//--------- test for actual signal instances (not just implicit), mimic QT and Boost.
+// can enable combiners
+
+/**
+ * @param {function=} combiner
+ * @constructor
+ */
+api.Signal = function(combiner) {
+	this._combiner = combiner || function() {};
+};
+
+// todo: support explicit ordering as Boost also?
+api.Signal.prototype.connect = function(slot) {
+	// 2nd arg 'sig' could in this case essentially be a(our) guid
+	var handle = api.connect(this, this, this, slot); // Boost calls return here 'connection'
+
+	handle.connected = true; // Boost stores this too (and "old" MK)
+	handle.disconnect = function() {
+		if (!this.connected) return;
+		api.disconnect(this);
+		this.connected = false;
+	};
+
+	// todo: support block/unblock? or this https://www.boost.org/doc/libs/1_68_0/doc/html/boost/signals2/shared_connection_block.html
+
+	return handle;
+};
+
+
+api.Signal.prototype.signal = function(...args) {
+	var obj = this;
+	var sig = this; // (!)
+
+	var m = store.get(obj);
+	if (!m) return;
+
+	var callbacks = m.get(sig); // Set
+	if (!callbacks) return;
+
+	var results = [];
+	var errors = [];
+	// no need to lock disconnects during loop since Map foreach handles removals
+	callbacks.forEach(function(callback) {
+		try {
+			var ret = callback.call(obj, ...args); // observe that callback might have been bound to 'dest' in connect
+			results.push(ret); // yes, we could yield this maybe (specify combiner to take iterable)
+		} catch (ex) {
+			console.error('signal:', ex); // maybe not log in production..
+			// buffering exceptions as MK does
+			errors.push(ex);
+		}
+	});
+
+	try {
+		if (errors.length === 1) {
+			throw errors[0];
+		} else
+		if (errors.length > 1) {
+			var e = new Error("Multiple errors thrown in handling 'sig', see errors property");
+			e.errors = errors;
+			throw e;
+		}
+	} finally {
+		return this._combiner(results);
+	}
+};
+
+
+api.Signal.prototype.disconnect = function(slot) {
+	api.disconnectAllTo(this, slot);
 };
 
 
