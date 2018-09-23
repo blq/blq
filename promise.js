@@ -3,7 +3,7 @@
  * Async helpers. For MochiKit, jQuery(2+), and ES6 Promise etc
  *
  * @see https://promisesaplus.com/
- * @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html
+ * @see https://blq.github.io/mochikit/doc/html/MochiKit/Async.html
  * @see http://bluebirdjs.com/docs/getting-started.html
  *
  * todo: drop all jQuery stuff once we move to jQuery 3 that has real A+ Promises (hmm, but still the jQ.Deferred object stuff??)
@@ -1012,30 +1012,6 @@ api.maybeAfter = function(p, after, delay) {
 };
 
 
-//------ test api style ----
-/*
-var p = ajax(123).then(function() {
-	// asdf asdf
-});
-after_stuff();
-return p;
-
-after(ajax(), show_spinner).finally(hide_spinner).then(function(ret) {
-	return handle_ajax(ret);
-});
-
-// if injected in promise
-ajax(123)
-	.after(function() {
-		show_spinner();
-	})
-	.then(function(ret) {
-		return handle_ajax(ret);
-	});
-*/
-//---------
-
-
 /**
  * Convenience for both sync and async try-semantic
  * (sync code will still run in same tick)
@@ -1193,7 +1169,7 @@ api.isPromise = function(obj) {
 
 /**
  * does 'obj' fulfil the MochiKit.Async.Deferred interface?
- * http://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred
+ * https://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred
  *
  * @param {*} obj
  * @return {boolean}
@@ -1237,6 +1213,7 @@ api.RAF = function() {
 /**
  * test inspired by Idle-until-urgent setup https://philipwalton.com/articles/idle-until-urgent/
  * returns a 'thenable' that if used triggers explicitly, otherwise queued on idle.
+ * @return {IThenable}
  */
 api.idleUntilUrgent = function(initFn) {
 	var value;
