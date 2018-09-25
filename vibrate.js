@@ -37,7 +37,7 @@ vib.supports_vibration = function() {
  *
  * @see http://caniuse.com/#feat=vibration
  *
- * @param {(number|Array.<number>)=} v default single 1s vibration
+ * @param {(number|Array.<number>)=} v ms default single 1s vibration
  */
 vib.vibrate = function(v) {
 	if (arguments.length == 0)
