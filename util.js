@@ -383,6 +383,33 @@ util.copyToClipboard = function(text) {
 };
 
 
+util._globalID = null;
+util._id = 0;
+
+/**
+ * make all(!) objects have a unique (lazy) '__id__' property
+ * idea from https://twitter.com/dan_abramov/status/794655915769266178?lang=en
+ */
+util.enableGlobalDebugID = function() {
+	if (!util._globalID) {
+		util._globalID = new WeakMap();
+
+		Object.defineProperty(Object.prototype, '__id__', {
+			get: function() {
+				var id = util._globalID.get(this);
+				if (id === undefined) {
+					id = util._id++;
+					util._globalID.set(this, id);
+				}
+				return id;
+			},
+			writable: true,
+			configurable: true
+		});
+	}
+};
+
+
 return util;
 
 });
