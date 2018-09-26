@@ -39,7 +39,7 @@ api._loadGoogleMaps = function(key) {
 		// todo: not sure we can use the global "gm_authFailure"? If it fires, it fires loong _after_ API-"success"..
 		// todo: expose version nr, language etc (-> use a url builder)
 		// todo: or drop requirement on require.js?
-		require(['https://maps.googleapis.com/maps/api/js?key=' + key + '&callback=_blq_googleMapsReady'],
+		require(['https://maps.googleapis.com/maps/api/js?v=quarterly&key=' + key + '&callback=_blq_googleMapsReady'],
 			function() {
 				console.debug('Google Maps base script loaded. Waiting for the API-ready callback.. (1/2)');
 			},
