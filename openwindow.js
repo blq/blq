@@ -8,7 +8,7 @@
  * @author Fredrik Blomqvist
  */
 
-define(['jquery', 'MochiKit/Base'], function($) {
+define(['jquery'], function($) {
 
 // namespace
 var blq = {};
@@ -46,7 +46,7 @@ blq.openWindow = function(url, title, options, optWin) {
 		//scrollbars: 0
 	}, options);
 
-	var strWinSettings = MochiKit.Base.items(winSettings).map(function(item) { return item[0]+'='+item[1]; }).join(',');
+	var strWinSettings = Object.entries(winSettings).map(function(item) { return item[0]+'='+item[1]; }).join(',');
 	console.debug('Opening window "%s" with args: "%s"', url, strWinSettings);
 
 	var srcWin = optWin || window;
