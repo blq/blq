@@ -21,7 +21,7 @@ var api = {};
 api.share = function(title, text, url) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share
 	// https://developers.google.com/web/updates/2016/09/navigator-share
-	// http://caniuse.com/#feat=web-share (Chrome for Android now basically)
+	// https://caniuse.com/#feat=web-share (Chrome for Android now basically)
 	if (navigator.share) {
 		return navigator.share({
 			title: title,

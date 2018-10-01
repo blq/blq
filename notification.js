@@ -1,7 +1,7 @@
 /**
  * Web Notification.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Notification
- * http://caniuse.com/#feat=notifications
+ * https://caniuse.com/#feat=notifications
  *
  * @author Fredrik Blomqvist
  *
@@ -14,7 +14,7 @@ var notif = {};
 /**
  * Web Notification.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Notification
- * http://caniuse.com/#feat=notifications
+ * https://caniuse.com/#feat=notifications
  * Doesn't work in Android Chrome!
  *
  * Yes, you *must* bind this to an element the user *interactively* has to click!
@@ -40,7 +40,7 @@ notif.enableNotifications = function(element, callback) {
 /**
  * Web Notification
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Notification
- * http://caniuse.com/#feat=notifications
+ * https://caniuse.com/#feat=notifications
  * Doesn't work in Android Chrome!
  *
  * todo: not quite ready. expose tags, callbacks etc

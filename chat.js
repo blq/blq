@@ -1,7 +1,7 @@
 /**
  * @fileoverview
  * simpler, more robust(?) wrapper around the PeerJS API, for now geared to chat use.
- * @see http://peerjs.com
+ * @see https://peerjs.com
  *
  * todo: generalize some more. expose/support file transfers, calls/media etc.
  * todo: handle reconnect.. (possible to keep connected across a 4g<->wifi roam?)
@@ -31,7 +31,7 @@ define([
 
 
 // application singleton/namespace. todo: change to "real" class?
-// @see http://peerjs.com/docs
+// @see https://peerjs.com/docs
 var chat = {
 
 	// PeerJS object. set after initialize()
@@ -45,7 +45,7 @@ var chat = {
 	},
 
 	// PeerJS account (can run our own also)
-	// @see http://peerjs.com/peerserver
+	// @see https://peerjs.com/peerserver
 	// todo: create manual auth code?
 	key: 'x7fwx2kavpy6tj4i',
 
@@ -169,7 +169,7 @@ var chat = {
 
 				// can actually connect to other Peers before 'open' event
 				// but guess this is more easy to follow
-				// @see http://peerjs.com/docs/#peeron-open
+				// @see https://peerjs.com/docs/#peeron-open
 				chat.peer.once('open', _resolve);
 				chat.peer.once('error', _reject);
 

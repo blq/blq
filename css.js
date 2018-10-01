@@ -120,7 +120,7 @@ css.cssGfxInit = function() {
 
 /**
  * todo: add a cssInit to load custom css also
- * see http://monkeyandcrow.com/blog/drawing_lines_with_css3/
+ * see http://www.monkeyandcrow.com/blog/drawing_lines_with_css3/
  * todo: make the target node default to current document? (need to move it in arg order..)
  *
  * @param {!Pos} p0
@@ -438,8 +438,8 @@ css.refreshCSS = function(sel) { // rename? refreshDocumentCSS?
 
 
 /**
- * for example, @see http://davidwalsh.name/demo/css-filters.php
- * for browser support @see http://caniuse.com/#feat=css-filters
+ * for example, @see https://davidwalsh.name/demo/css-filters.php
+ * for browser support @see https://caniuse.com/#feat=css-filters
  * todo: expose as a jQuery plugin?
  *
  * @param {!jQuerySelector} elem

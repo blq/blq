@@ -162,7 +162,7 @@ if (typeof MochiKit != 'undefined' && typeof MochiKit.Iter != 'undefined') {
 	// (assumes noone messes too much with the storage during iteration (goes backwards similar to .each()) )
 	// iterator returns: { key, value }
 	// enables: MochiKit.Iter.forEach(store, function(elem) { .. });
-	// @see http://blq.github.io/mochikit/doc/html/MochiKit/Iter.html#fn-iter
+	// @see https://blq.github.io/mochikit/doc/html/MochiKit/Iter.html#fn-iter
 	// todo: hmm, or expose this as a store.enableMochKitIter? then a user can enable even if MK is loaded after this file.
 	// (maybe try something like this to set a "soft" dependency? http://stackoverflow.com/questions/14164610/requirejs-optional-dependency/27422370#27422370  hmm, still not quite. we want only opt-in if someone _else_ requires MK..)
 	store['__iterator__'] = function() {

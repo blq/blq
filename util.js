@@ -14,7 +14,7 @@ var util = {};
  * Mostly for better Android support.
  * (this is not a polyfill. Doesn't emulate the 'slice' method etc).
  *
- * @see http://caniuse.com/#feat=blobbuilder Android 46+ (4.1+ with fallback). IE10+(not with JS content?)
+ * @see https://caniuse.com/#feat=blobbuilder Android 46+ (4.1+ with fallback). IE10+(not with JS content?)
  * @deprecated standard API works in all relevant browsers now(?)
  * @param {Array.<string|Array|Blob|ArrayBuffer|ArrayBufferView>} parts
  * @param {string} mimeType (todo: reasonable with some default maybe?)
@@ -85,7 +85,7 @@ util.getUid = function() {
  * run when your page is done
  * (assumes noone wipes out entire <body> contents..)
  * todo: opt-out if not on a Mobile browser? (Desktop case probably don't want fullscreen. also not in Cordova)
-* @see http://caniuse.com/#feat=fullscreen
+* @see https://caniuse.com/#feat=fullscreen
 */
 util.enableFirstClickFullscreen = function() {
 	// @see https://brad.is/coding/BigScreen/

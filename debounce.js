@@ -2,10 +2,10 @@
  * @fileoverview
  * time-based debouncing and throttling
  *
- * @see http://en.wikipedia.org/wiki/Debounce#Contact_bounce
+ * @see https://en.wikipedia.org/wiki/Debounce#Contact_bounce
  * @see http://ajaxian.com/archives/debounce-your-javascript-functions
  * @see http://unscriptable.com/index.php/2009/03/20/debouncing-javascript-methods/
- * @see http://benalman.com/projects/jquery-throttle-debounce-plugin/
+ * @see https://benalman.com/projects/jquery-throttle-debounce-plugin/
  *
  * @author Fredrik Blomqvist
  *

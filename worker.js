@@ -1,7 +1,7 @@
 /**
  * @fileoverview
  * Web Worker utils. Notably support for inline function workers, i.e without external file.
- * @see http://www.w3.org/TR/workers/
+ * @see https://www.w3.org/TR/workers/
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
  *
  * todo: transferable objects!!
@@ -19,8 +19,8 @@ var worker = {};
  * Prerequirement for createInlineWebWorker, makeFnWorkerAsync etc
  *
  * Workers does not work in IE<9 or Android < 4.4
- * @see http://caniuse.com/#feat=webworkers
- * @see http://caniuse.com/#feat=blobbuilder
+ * @see https://caniuse.com/#feat=webworkers
+ * @see https://caniuse.com/#feat=blobbuilder
  *
  * @return {boolean}
  */
@@ -92,8 +92,8 @@ worker._createInlineWebWorkerURL = function(fnJs)  {
  *
  *
  * Does not work in IE<9 or Android < 4.4
- * @see http://caniuse.com/#feat=webworkers Android 4.4+, IE10+
- * @see http://caniuse.com/#feat=blobbuilder Android 46+ (4.1+ with fallback). IE10+(not with JS content?)
+ * @see https://caniuse.com/#feat=webworkers Android 4.4+, IE10+
+ * @see https://caniuse.com/#feat=blobbuilder Android 46+ (4.1+ with fallback). IE10+(not with JS content?)
  *
  * @see worker._createInlineWebWorkerURL
  * @see worker.makeFnWorkerAsync() for simpler run-once case.

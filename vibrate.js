@@ -2,7 +2,7 @@
  * @fileoverview
  * Vibration API
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API
- * @see http://www.w3.org/TR/vibration/
+ * @see https://www.w3.org/TR/vibration/
  *
  * @author Fredrik Blomqvist
  */
@@ -35,7 +35,7 @@ vib.supports_vibration = function() {
  * silently fails if vibration not supported
  * and nope, can't vibrate from a hidden tab or minized browser! :(
  *
- * @see http://caniuse.com/#feat=vibration
+ * @see https://caniuse.com/#feat=vibration
  *
  * @param {(number|Array.<number>)=} v ms default single 1s vibration
  */

@@ -8,7 +8,7 @@ var jsonpi = {};
 
 /**
  * "JSONPI"
- * @see http://www.slideshare.net/benvinegar/modern-iframe-programming-8281214
+ * @see https://www.slideshare.net/benvinegar/modern-iframe-programming-8281214
  * todo: dang, unless other site cooperates (similar to JSONP) we still get XSS reject.. :(
  * A pure "blind" POST works though, but without any error-callback.
  *

@@ -83,9 +83,9 @@ api.mochiKitDeferredTojQueryPromise = function(md) {
  * todo: should basically deprecate this path. The Promises in jQuery < 3 are not A+ compatible anyway (and has major flaws with exceptions and err->ok path)
  * -> Create a new similar one but for A+ Promies
  *
- * @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html
- * @see http://api.jquery.com/category/deferred-object/
- * @see http://api.jquery.com/promise/
+ * @see https://blq.github.io/mochikit/doc/html/MochiKit/Async.html
+ * @see https://api.jquery.com/category/deferred-object/
+ * @see https://api.jquery.com/promise/
  *
  * @param {T=} [obj] default MochiKit.Async.Deferred.prototype pass in a custom obj if only single mod is required
  * @return {!(T|MochiKit.Async.Deferred.prototype)} same obj passed in constructor or default MochiKit.Async.Deferred.prototype
@@ -94,8 +94,8 @@ api.mochiKitDeferredTojQueryPromise = function(md) {
 api._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
 	var mkdp = obj || MochiKit.Async.Deferred.prototype;
 
-	// @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallbacks
-	// @see http://api.jquery.com/deferred.then/
+	// @see https://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallbacks
+	// @see https://api.jquery.com/deferred.then/
 	mkdp.then = function(done, fail, progress) {
 		if (typeof progress == 'function') {
 			console.warn('progress callback not yet emulated');
@@ -103,8 +103,8 @@ api._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
 		return this.addCallbacks(done, fail);
 	};
 
-	// @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallback
-	// @see http://api.jquery.com/deferred.done/
+	// @see https://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallback
+	// @see https://api.jquery.com/deferred.done/
 	mkdp.done = function() {
 		var fns = MochiKit.Base.flattenArguments(arguments);
 		var self = this;
@@ -116,8 +116,8 @@ api._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
 		});
 	};
 
-	// @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.adderrback
-	// @see http://api.jquery.com/deferred.fail/
+	// @see https://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.adderrback
+	// @see https://api.jquery.com/deferred.fail/
 	mkdp.fail = function() {
 		var fns = MochiKit.Base.flattenArguments(arguments);
 		var self = this;
@@ -129,8 +129,8 @@ api._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
 		});
 	};
 
-	// @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addboth
-	// @see http://api.jquery.com/deferred.always/
+	// @see https://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addboth
+	// @see https://api.jquery.com/deferred.always/
 	mkdp.always = function() {
 		var fns = MochiKit.Base.flattenArguments(arguments);
 		var self = this;
@@ -142,15 +142,15 @@ api._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
 		});
 	};
 
-	// @see http://api.jquery.com/deferred.progress/
+	// @see https://api.jquery.com/deferred.progress/
 	mkdp.progress = function() {
 		console.warn('progress() not supported/emulated yet. no eqvivalent in MK');
 		// otherwise same multi-fn signature as done/fail/always
 	};
 
 	// Dang! state has same name.. :(  skip, shouldn't be used that often?..
-	// @see http://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.state
-	// @see http://api.jquery.com/deferred.state/
+	// @see https://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.state
+	// @see https://api.jquery.com/deferred.state/
 	// mkdp.state = function() {
 	// 	switch (this.state()) { // doh!
 	// 		case 'unfired':
@@ -162,7 +162,7 @@ api._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
 	// 	}
 	// };
 
-	// @see http://api.jquery.com/deferred.promise/
+	// @see https://api.jquery.com/deferred.promise/
 	mkdp.promise = function() {
 		// identity op (yes, part of promise interface too. also only requirement for jQuery.when() (sniff))
 		return this;
@@ -420,7 +420,7 @@ api.promisify = function(fn) { // name? bindAsync? makeAsync?
  * Create an ES6 Promise that can be resolved externally, similar to "old" Deferred pattern
  // (See Q, MK, Dojo and pre-standard(deprecated) Promise.defer)
  * (could also create a class that inherits from Promise)
- * @see http://lea.verou.me/2016/12/resolve-promises-externally-with-this-one-weird-trick/
+ * @see https://lea.verou.me/2016/12/resolve-promises-externally-with-this-one-weird-trick/
  * todo: ok name?
  *
  * @return {!Promise} with added resolve() and reject() methods
@@ -797,7 +797,7 @@ api.allDict = function(dictPromises) {
 
 /**
  * like MochiKit.Async.DeferredList in 'consumeErrors' mode
- * @see http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferredlist
+ * @see https://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferredlist
  * todo: dictionary variant? (todo: or just mimic a MK DeferredList with flags?)
  * Note that this method will always succeed. The value or error is in result tuple[1]
  *

@@ -64,7 +64,7 @@ math.clamp = function(value, minValue, maxValue) {
 
 /**
  * Rounds a number to a specific number of decimal places
- * see also <a href="http://mochikit.com/doc/html/MochiKit/Format.html#fn-roundtofixed">MochiKit.Format.roundToFixed()</a> and <a href="#method_roundToMaxFixed">Franson.Util.roundToMaxFixed()</a>
+ * see also <a href="https://mochikit.com/doc/html/MochiKit/Format.html#fn-roundtofixed">MochiKit.Format.roundToFixed()</a> and <a href="#method_roundToMaxFixed">Franson.Util.roundToMaxFixed()</a>
  *
  * @param {number} value
  * @param {integer=} [numDecimals=3]
@@ -162,7 +162,7 @@ math.sign = Math.sign || function(v) {
  * def: abs(ceilMag(v))) == abs(ceilMag(-v)) (symmetric around 0)
  * (or simply: floor if v < 0, ceil if v > 0)
  * todo: I'm quite sure this operation has a better/official name? roundAwayFromZero? ("stretch"??)
- * @see http://msdn.microsoft.com/en-us/library/system.midpointrounding.aspx
+ * @see https://docs.microsoft.com/en-us/dotnet/api/system.midpointrounding
  *
  * Please note that floating point doesn't behave "perfectly". you *will* get minor differences..
  *

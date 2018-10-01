@@ -4,7 +4,7 @@
  *
  * todo: switch to new URL API
  *	https://developer.mozilla.org/en-US/docs/Web/API/URL
- *	http://caniuse.com/#feat=url
+ *	https://caniuse.com/#feat=url
  *
  * @author Fredrik Blomqvist
  */
@@ -57,7 +57,7 @@ url.parseUrl = function(uri) {
 
 /**
  * note: assumes running in a DOM-context
- * @see http://davidwalsh.name/get-absolute-url
+ * @see https://davidwalsh.name/get-absolute-url
  *
  * @param {string} uri
  * @return {string}

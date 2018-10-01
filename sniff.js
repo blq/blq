@@ -2,7 +2,7 @@
  * @fileoverview
  * Various detection and sniffing functions
  *
- * @see http://caniuse.com/ for estimates of browser support. Once features reach maturity can drop more of stuff like this
+ * @see https://caniuse.com/ for estimates of browser support. Once features reach maturity can drop more of stuff like this
  *
  * @author Fredrik Blomqvist
  *
@@ -73,7 +73,7 @@ sniff.isFullScreen = function(win) {
 
 
 /**
- * @see http://caniuse.com/#search=cors
+ * @see https://caniuse.com/#search=cors
  * doesn't care about IE (i.e now basically only for older Android)
  * @return {boolean}
  */
@@ -97,7 +97,7 @@ sniff.hasGeolocation = function() {
 sniff.canUseGeolocation = function() {
 	// todo: cache result? (user can change her mind during a session?)
 	return new Promise(function(resolve, reject) {
-		// @see http://caniuse.com/#feat=permissions-api
+		// @see https://caniuse.com/#feat=permissions-api
 		if (typeof window.navigator.permissions != 'undefined') {
 			// todo: does this include secure domain check implicitly?
 			window.navigator.permissions.query({ name: 'geolocation' }).then(function(p) {

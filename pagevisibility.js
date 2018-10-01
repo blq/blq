@@ -1,7 +1,7 @@
 /**
  * @fileoverview
  * Very simple lib for pagevis detection
- * @see http://canop.org/blog/?p=379b <- dead link..
+ * @see https://canop.org/blog/?p=379b <- dead link..
  * todo: perhaps change to use a less "clever" non-overloaded API here? .. (isVisible, subscribe, unsubscribe ?)
  *
  * usage:
@@ -9,8 +9,8 @@
  * var visible = pageVisible(); // get current state
  *
  * turns into a NOP if feature not supported
- * @see http://caniuse.com/#feat=pagevisibility
- * todo: seems like we could drop basically all polyfills now? 
+ * @see https://caniuse.com/#feat=pagevisibility
+ * todo: seems like we could drop basically all polyfills now?
  *
  * @author Fredrik Blomqvist
  */
@@ -52,11 +52,11 @@ api.pageVisible = (function() {
 	}
 
 	return function(callback) {
-		if (callback) {			
+		if (callback) {
 			// todo: or return the bound fn (wrapper) here (treat it as a token/handle) so we could provide an removeEventListener?
 			document.addEventListener(eventKey, function() {
 				callback(!document[stateKey]);
-			});			
+			});
 		}
 		return !document[stateKey];
 	};

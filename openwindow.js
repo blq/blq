@@ -3,7 +3,7 @@
  * helper for window.open(..)
  *
  * @see https://developer.mozilla.org/en/docs/DOM/window.open
- * @see http://www.w3schools.com/jsref/met_win_open.asp
+ * @see https://www.w3schools.com/jsref/met_win_open.asp
  *
  * @author Fredrik Blomqvist
  */

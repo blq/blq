@@ -41,7 +41,7 @@ dom.getScopedjQuerySelector = function(root) {
  * note that this only seems to work if a scrollbar is actually visible on the screen..
  *
  * @see https://github.com/brandonaaron/jquery-getscrollbarwidth
- * @see also http://davidwalsh.name/detect-scrollbar-width
+ * @see also https://davidwalsh.name/detect-scrollbar-width
  *
  * @return {number} (can we assume an integer?)
  */
