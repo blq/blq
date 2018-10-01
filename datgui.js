@@ -1,5 +1,5 @@
 /**
- * @see https://code.google.com/p/dat-gui/
+ * @see https://github.com/dataarts/dat.gui
  *
  * todo: cool to create some kind of direct binders to Vue or Angular maybe?
  *
@@ -10,7 +10,7 @@ define(['blq/assert', 'jquery', 'dat/dat.gui'], function(assert, $, GUI) {
 
 /**
  * sets up a DAT GUI using a declarative json style config
- * @see https://code.google.com/p/dat-gui/
+ * @see https://github.com/dataarts/dat.gui
  *
  * example:
  	[
