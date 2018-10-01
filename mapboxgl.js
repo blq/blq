@@ -16,12 +16,12 @@ var api = {};
 /**
  * dynamic loading of script and CSS.
  * cached.
- * see the requirejs shim for exact urls and version nr. (todo: ? no version info available when loaded?)
+ * see the requirejs shim for exact urls and version nr.
  * @return {!Promise}
  */
 api.loadMapBoxScript = function() { // or just loadScript() ?
 	return new Promise(function(resolve, reject) {
-		// ! must load using requirejs since mapbox recognizes it and switches to amd mode anyway
+		// ! must load using requirejs since mapbox recognizes it and switches to AMD mode anyway
 		require(['mapboxgl', 'css!mapboxgl'],
 			function(mapboxgl) {
 				console.log('Mapbox GL version:', mapboxgl.version);

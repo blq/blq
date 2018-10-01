@@ -36,7 +36,7 @@ yql.query = function(query) {
 /**
  * first test. make more generic!
  *
- * @see http://www.datatables.org/
+ * @see https://www.datatables.org/
  *
  * @param {string|!Array.<string>} stocks
  * @return {!Promise}
