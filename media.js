@@ -4,11 +4,11 @@
  *
  */
 define([
-	'blq/assert',
+	// 'blq/assert',
 	'jquery',
 	'blq/dom',
 	'blq/openwindow'
-], function(assert, $, dom, openwin) {
+], function(/*assert,*/ $, dom, openwin) {
 
 // namespace
 var media = {};
@@ -18,7 +18,7 @@ var media = {};
  * @return {!HTMLCanvasElement}
  */
 media._grabVideoSnapshot = function(video) {
-	assert(video != null);
+	// assert(video != null);
 
 	var vid = $(video).get(0);
 
@@ -38,7 +38,7 @@ media._grabVideoSnapshot = function(video) {
  * @return {string}
  */
 media.toDataUrl = function(source) {
-	assert(source != null);
+	// assert(source != null);
 
 	source = $(source).get(0);
     var canvas = document.createElement('canvas');
@@ -60,7 +60,7 @@ media.toDataUrl = function(source) {
  * @return {string} data URI
  */
 media.getBase64Image = function(img) {
-	assert(img != null);
+	// assert(img != null);
 
     // create an empty canvas element
     var canvas = document.createElement('canvas');
@@ -87,7 +87,7 @@ media.getBase64Image = function(img) {
  * @return {!Window}
  */
 media._openScreenshotWindow = function(canvas, title) {
-	assert(canvas != null);
+	// assert(canvas != null);
 
 	canvas = $(canvas).get(0);
 	var imgUrl = canvas.toDataURL(); // basically always .png (?), only some browsers support 'image/jpeg' etc.
@@ -110,9 +110,9 @@ media._openScreenshotWindow = function(canvas, title) {
  * @return {!HTMLLinkElement} probably don't need this, use-case is to open immediately (UI)
  */
 media.grabSnapShotLink = function(canvasOrVideo, name, format) {
-	assert(canvasOrVideo != null);
+	// assert(canvasOrVideo != null);
 	name = name || (document.title + '_screenshot'); // user can still change in save-as-window // todo: append date?
-	assert(typeof name == 'string');
+	// assert(typeof name == 'string');
 
 	var elem = $(canvasOrVideo).get(0);
 	var url = elem.toDataURL(format /*| 'image/png'*/); // .png seems to be default, non changeable, in Chrome at least
@@ -141,7 +141,7 @@ media._grabVideoSnapshotLink = function(video, name, format) {
  * @return {!Object} // not sure which closure type maps to (context objects doesn't seem to have a base interface either?)
  */
 media.getWebGLContex = function(canvas) {
-	assert(canvas != null);
+	// assert(canvas != null);
 
 	var gl = null;
 	try {
@@ -174,12 +174,12 @@ media.loadVideo = function(src, options) {
 		loop: false,
 		controls: false
 	}, options);
-	
+
 	// "controls" is a not a boolean attribute. If exists at all implies true
 	if (!options.controls) {
 		delete options.controls;
 	}
-		
+
 	return $('<video>', Object.assign(options, {
 		src: src
 	})).get(0);

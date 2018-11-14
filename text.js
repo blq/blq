@@ -22,7 +22,7 @@ api.fuzzySearch = function(needle, haystack, cmp) {
 	// assert(typeof haystack == 'string');
 
 	cmp = cmp || function(a, b) { return a === b; }; // == MochiKit.Base.operator.seq()
-	assert(typeof cmp == 'function');
+	// assert(typeof cmp == 'function');
 
 	var hlen = haystack.length;
 	var nlen = needle.length;

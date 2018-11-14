@@ -3,13 +3,15 @@
  * @author Fredrik Blomqvist
  *
  */
-define(['blq/assert', 'jquery'], function(assert, $) {
+define(['jquery'], function($) {
 
 // namespace
 var util = {};
 
 
 /**
+ * @deprecated "new Blob" should work in all relevant browsers now
+ *
  * Factory to create Blobs. fallback to old BlobBuilder API.
  * Mostly for better Android support.
  * (this is not a polyfill. Doesn't emulate the 'slice' method etc).
@@ -52,7 +54,7 @@ util._createBlob = function(parts, mimeType) {
  * @return {string}
  */
 util.escapeHtml = function(strHtml) {
-	assert(typeof strHtml == 'string');
+	// assert(typeof strHtml == 'string');
 
 	// return $('<div>').text(strHtml).html(); // also fails in the ng-sanitizer! (same strings...)
 
@@ -239,8 +241,8 @@ util.isEmptyObj = function(obj) {
  */
 util.replaceArray = function(org, newContent) {
 	// todo: change to isArray or isArrayLike tests I guess
-	assert(org != null);
-	assert(newContent != null);
+	// assert(org != null);
+	// assert(newContent != null);
 
 	var args = [0, org.length].concat(newContent);
 	org.splice.apply(org, args);
@@ -267,8 +269,8 @@ util.emptyArray = function(arr) {
  * @template A, B
  */
 util.replaceObject = function(org, newContent) {
-	assert(org != null);
-	assert(newContent != null);
+	// assert(org != null);
+	// assert(newContent != null);
 
 	// empty
 	for (var k in org) {
