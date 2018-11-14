@@ -1214,6 +1214,7 @@ api.RAF = function() {
 /**
  * test inspired by Idle-until-urgent setup https://philipwalton.com/articles/idle-until-urgent/
  * returns a 'thenable' that if used triggers explicitly, otherwise queued on idle.
+ * todo: this impl might have issues: https://twitter.com/snigelpaogat/status/1043935781348347907
  * @return {IThenable}
  */
 api.idleUntilUrgent = function(initFn) {
