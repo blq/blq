@@ -6,7 +6,7 @@
  *
  */
 
-define(['blq/assert', 'jquery', 'jquery.serialize-object'], function(assert, $) {
+define([/*'blq/assert', */'jquery', 'jquery.serialize-object'], function(/*assert,*/ $) {
 
 // namespace
 var form = {};
@@ -27,8 +27,8 @@ var form = {};
  * .. return something?
  */
 form.onSubmitJSON = function(formSelector, callback, block) {
-	assert(formSelector != null);
-	assert(typeof callback == 'function');
+	// assert(formSelector != null);
+	// assert(typeof callback == 'function');
 	block = typeof block == 'boolean' ? block : true;
 
 	/** @this {HTMLFormElement} */
