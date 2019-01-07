@@ -105,11 +105,11 @@ api.createHumanStringCompare = function(options) {
 
 	// default is old impl. only case-insensitive (yes, there are algos for this but new browsers most likely have the Intl API)
 	var strCmp = options.case_sensitive ? cmp : function(a, b) {
-		return cmp(a.toLowerCase(), b.toLowerCase());
+		return cmp(a ? a.toLowerCase() : a, b ? b.toLowerCase() : b);
 	};
 
 	try {
-		// sniff for support (basically only older IE fails @see https://caniuse.com/#feat=internationalization )
+		// sniff for support (basically only IE10 and earlier fails @see https://caniuse.com/#feat=internationalization )
 		var collator = null;
 		if (typeof Intl != 'undefined' && typeof Intl.Collator == 'function') {
 			// fallback to en-US in case the other culture fails (incompatibility with Culture Codes)
@@ -126,7 +126,7 @@ api.createHumanStringCompare = function(options) {
 		}
 
 		if (collator != null)
-			strCmp = collator.compare.bind(collator); // (bind is probably not needed but anyway)
+			strCmp = collator.compare;
 	} catch(ex) {
 		console.error('Intl detection failed:', ex);
 	}
@@ -136,6 +136,31 @@ api.createHumanStringCompare = function(options) {
 	return strCmp;
 };
 
+
+/**
+ * @type {BinaryComparator}
+ */
+var _defaultHumanCmp = null;
+
+/**
+ * If you need customized settings see Franson.String.createHumanStringCompare() factory
+ * case-, accent-, and numeric by default
+ * @param {string} a
+ * @param {string} b
+ * @return {integer} -1, 0, +1
+ */
+api.humanStrCmp = function(a, b) {
+	// the factory is already cached, so this is simply lazy init x2
+	// but like this we skip all checks for speed
+	// todo: hmm, or let app-code set via a "setDefaultHumanCmp" call?
+	if (!_defaultHumanCmp) {
+		_defaultHumanCmp = api.createHumanStringCompare({
+			case_sensitive: false,
+			locale: navigator.language
+		});
+	}
+	return _defaultHumanCmp(a, b);
+};
 
 
 return api;
