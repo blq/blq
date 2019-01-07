@@ -67,7 +67,7 @@ ns.readFile = function(file, options) {
 	return new Promise(function(resolve, reject) {
 		var reader = new FileReader();
 
-		reader.onloadend = function(e) {
+		reader.onload = function(e) {
 			var data = this.result; // == e.target.result
 
 			if (options.output == 'base64') {
