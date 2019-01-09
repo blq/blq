@@ -22,12 +22,13 @@ var api = {};
 
 /**
  * todo: hmm, well, this gives true also for MK.Iters ...
+ * todo: hmm, at least native ES6 DS return iterators that *also* are iterables, i.e have Symbol. sniff?!
  * @param {*} obj
  * @return {boolean}
  */
 api.isES6Iterable = function(obj) {
-	if (obj != null && typeof Symbol == 'function' && typeof Symbol.iterator != 'undefined') {
-		return typeof obj[Symbol.iterator] == 'function' || typeof obj.next == 'function';
+	if (obj && typeof Symbol === 'function' && typeof Symbol.iterator != 'undefined') {
+		return typeof obj[Symbol.iterator] === 'function' || typeof obj.next === 'function';
 	}
 	return false;
 };
