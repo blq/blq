@@ -185,6 +185,36 @@ dom.isjQuery = function(obj) {
 };
 
 
+/**
+ * @param {HTMLElement} elem // todo: overload on selector also?
+ * @return {boolean}
+ */
+dom.isEditable = function(elem) {
+	return elem && (elem.tagName === 'INPUT' || elem.tagName === 'SELECT' || elem.tagName === 'TEXTAREA' || elem.isContentEditable);
+};
+
+
+/**
+ * // todo: overload on ready(doc, onReady) also?
+ * @param {function=} onReady
+ * @return {!Promise} optional promise interface
+ */
+dom.ready = function(onReady) {
+	return new Promise(function(resolve) {
+		if (document.readyState === 'loading') {
+			var loaded = function() {
+				document.removeEventListener('DOMContentLoaded', loaded);
+				resolve(); // pass document as arg?
+			};
+			document.addEventListener('DOMContentLoaded', loaded);
+		} else {
+			resolve();
+		}
+	})
+	.then(onReady); // ok? I think should work for null and non-fns anyway
+};
+
+
 return dom;
 
 });
