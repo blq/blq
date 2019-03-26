@@ -215,6 +215,39 @@ dom.ready = function(onReady) {
 };
 
 
+/**
+ * useful?
+ * @param {!HTMLElement} src
+ * @param {!HTMLElement} dst
+ * // todo: maybe an optional apply-pipe-callback function or offset/anchor?
+ * @return {!{cancel: Function}}
+ */
+dom.followElement = function(src, dst, optApply) {
+	optApply = optApply || function(xfrm) {
+		return xfrm;
+	};
+
+	var raf = null;
+
+	function follow() {
+		raf = requestAnimationFrame(follow);
+		dst.style.transform = optApply(src.style.transform);
+	}
+
+	follow();
+
+	// todo: hmm, maybe full start,stop/pause,cancel methods?
+	return {
+		cancel: function() {
+			if (raf) {
+				cancelAnimationFrame(raf);
+				raf = null;
+			}
+		}
+	};
+};
+
+
 return dom;
 
 });
