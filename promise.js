@@ -10,6 +10,7 @@
  * todo: async-memoizer, cache etc
  * todo: rename async.js?
  * todo: async iteration stuff? (basically becomes Bluebird then..)
+ * todo: ? https://github.com/tc39/proposal-promise-any
  *
  * @author Fredrik Blomqvist
  *
@@ -97,7 +98,7 @@ api._enableMochiKitDeferredMimicjQueryPromise = function(obj) {
 	// @see https://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallbacks
 	// @see https://api.jquery.com/deferred.then/
 	mkdp.then = function(done, fail, progress) {
-		if (typeof progress == 'function') {
+		if (typeof progress === 'function') {
 			console.warn('progress callback not yet emulated');
 		}
 		return this.addCallbacks(done, fail);
@@ -370,10 +371,10 @@ api.requirePromiseDict = function(scriptNameDict) {
  * example: createDeferred(function(resolve, reject) { .. if (ok) resolve(value); else reject(error); });
  *
  * @param {function(function, function)} executor
- * @return {!Deferred}
+ * @return {!MochiKit.Async.Deferred}
  */
 api.createDeferred = function(executor) {
-	if (typeof executor != 'function') {
+	if (typeof executor !== 'function') {
 		// A+ Promise doesn't convert invalid fn to Promise, fail immediately at top-level!
 		// call just to provoke native "is not a function" exception (TypeError)
 		executor('Deferred/Promise Executor must be a function');
@@ -402,6 +403,7 @@ api.createDeferred = function(executor) {
 /**
  * wrap function to overload on Promise arguments
  * (will of course always return a Promise now)
+ * todo: dang! this name collides with BB and Node's "promisify"
  * @param {function} fn
  * @return {function(): !Promise}
  */
@@ -495,7 +497,7 @@ api.timeout = function(p, ms, opt_err) {
 		var th = setTimeout(function() {
 			th = null;
 			// don't disturb argument count
-			opt_err !== 'undefined' ? reject(opt_err) : reject();
+			opt_err !== undefined ? reject(opt_err) : reject();
 		}, ms);
 
 		p.then(
@@ -520,17 +522,15 @@ api.timeout = function(p, ms, opt_err) {
 /**
  * get the value of the promise but don't take part in the chain.
  * i.e any exceptions you throw will go into the global scope, not into the pipe. any return value ignored.
- * todo: this for one, would be nice to be a Promise method I guess..
- * todo: ! this is not according to Bluebird it seems!
+ * Also, compared to "tap" the chain doesn't wait for this.
  * @param {!Promise} p
  * @param {Function} callback
- * // todo: allow third arg 'errback' directly here?
+ * // todo: could allow third arg 'errback' directly here? (BB doesn't do that though)
  * @return {!Promise}
  */
-api.tap = function(p, callback) {
+api.tapOut = function(p, callback) {
 	p.then(function(val) {
 		// "lift" call outside the try-catch guard
-		// todo: hmm, could also only move an actual error-throw outside? (i.e re-throw in settimeout)
 		setTimeout(function() {
 			callback(val);
 		}, 0);
@@ -539,13 +539,15 @@ api.tap = function(p, callback) {
 	return p;
 };
 
-
-// todo: or call waiting tap tapWait?
-
-api.tapCatch = function(p, errback) {
+/**
+ * Similar to "tapOut"
+ * @param {!Promise} p
+ * @param {Function} errback
+ * @return {!Promise}
+ */
+api.tapCatchOut = function(p, errback) {
 	p.catch(function(err) {
 		// "lift" call outside the try-catch guard
-		// todo: hmm, could also only move an actual error-throw outside? (i.e re-throw in settimeout)
 		setTimeout(function() {
 			errback(err);
 		}, 0);
@@ -557,7 +559,7 @@ api.tapCatch = function(p, errback) {
 
 // this is "standards", Bluebird conforming impl. I like it other way when exceptions are visible?
 // -> or change "my way" to name it ".bailout()" or something? ;)
-api._tap = function(p, handler) {
+api.tap = function(p, handler) {
 	return p.then(function(value) {
 		return new Promise(function(resolve) {
 			resolve(handler(value));
@@ -567,7 +569,7 @@ api._tap = function(p, handler) {
 	});
 };
 
-api._tapCatch = function(p, handler) {
+api.tapCatch = function(p, handler) {
 	return p.catch(function(err) {
 		return new Promise(function(resolve, reject) {
 			reject(handler(err));
@@ -577,9 +579,12 @@ api._tapCatch = function(p, handler) {
 	});
 };
 
-// another interesting variant that is inteded to be inserted
-// in a plain p.then(inlineTap(console.log)).then(..). see https://github.com/sindresorhus/p-tap
-// todo: maybe enable this kind of inline-API for more functions!?
+/**
+ * another interesting variant that is inteded to be inserted
+ * in a plain p.then(inlineTap(console.log)).then(..). see https://github.com/sindresorhus/p-tap
+ * todo: maybe enable this kind of inline-API for more functions!?
+ * todo: inlineTapOut()
+ */
 api.inlineTap = function(handler) {
 	return function(value) {
 		var ret = function() { return value; };
@@ -589,6 +594,10 @@ api.inlineTap = function(handler) {
 	};
 };
 
+/**
+ * similar to inlineTap()
+ * todo: inlineTapCatchOut()
+ */
 api.inlineTapCatch = function(handler) {
 	return function(err) {
 		var ret = function() { return Promise.reject(err); };
@@ -639,10 +648,10 @@ api.value = function(val) {
  * @param {!Function} callback gets no input args.
  * @return {!Promise} same as input. Not affected by callback return/throw
  */
-api.finally = function(p, callback) {
+api.finally = function(p, callback) { // todo: rename "finallyOut" now? (if using setTimeout impl)
 	var fn = function() {
 		// "lift" call outside the try-catch guard
-		// todo: ok? same reasoning as tap() vs _tap() ideas above.. (seems standard keeps exceptions in the pipe anyway.. hmm)
+		// todo: ok? same reasoning as tap() vs tapOut() ideas above.. (seems standard keeps exceptions in the pipe anyway.. hmm)
 		setTimeout(function() {
 			callback(); // (can't use directly in setTimeout since many browsers pass an arg to it..)
 		}, 0);
@@ -657,8 +666,8 @@ api.finally = function(p, callback) {
 // test. inspired by Bluebird
 // todo: custom teardown method/function? (simply use/assume (goog.)IDisposable ?)
 api.using = function(disposable, fn) {
-	// assert(typeof disposable.promise == 'function');
-	// assert(typeof disposable.dispose == 'function');
+	// assert(typeof disposable.promise === 'function');
+	// assert(typeof disposable.dispose === 'function');
 
 	return disposable.promise()
 		.then(fn)
@@ -805,7 +814,7 @@ api.allDict = function(dictPromises) {
  * @return {!Promise} Array<[boolean, result]> tuples
  */
 api.allConsume = function(promises) {
-	if (promises.length == 0) {
+	if (promises.length === 0) {
 		return Promise.resolve([]);
 	}
 	return new Promise(function(resolve, reject) {
@@ -813,7 +822,7 @@ api.allConsume = function(promises) {
 		var counter = promises.length;
 
 		var _checkEnd = function() {
-			if (--counter == 0) {
+			if (--counter === 0) {
 				resolve(results);
 			}
 		};
@@ -950,7 +959,9 @@ api.wrap = function(p) {
 		also: api.also, // == after
 		maybeAfter: api.maybeAfter,
 		try: api.try,
-		tapCatch: api._tapCatch,
+		tapCatch: api.tapCatch,
+		tapOut: api.tapCatchOut,
+		tapCatchOut: api.tapCatchOut
 		// .. more?
 	});
 };
@@ -999,7 +1010,7 @@ api.maybeAfter = function(p, after, delay) {
 	// but without it you lose the "flow" and are tempted to add
 	// code *before* the async call!
 
-	delay = typeof delay == 'number' ? delay : 50;
+	delay = typeof delay === 'number' ? delay : 50;
 
 	var h = setTimeout(function() {
 		h = null;
@@ -1072,7 +1083,7 @@ api.chainCalls = function(asyncFnQueue) {
  * @return {!Promise}
  */
 api.retry = function(tryFn, opt) {
-	var sleep = opt.sleep || 500; // todo: support progressive longer sleep periods?
+	var sleep = opt.sleep || 500; // todo: support progressively longer sleep periods?
 	var numTries = opt.numTries || -1; // -1 == never stop
 
 	return new Promise(function(resolve, reject) {
@@ -1146,13 +1157,14 @@ api.triggerOnTrue = function(fn) {
  * @return {boolean}
  */
 api.isThenable = function(obj) {
-	return obj && typeof obj.then == 'function';
+	return obj && typeof obj.then === 'function';
 };
 
 
 /**
  * does 'obj' fulfil the Promise interface?
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/prototype
+ * note: isThenable() cehck should typically be enough
  *
  * @param {*} obj
  * @return {boolean}
@@ -1160,9 +1172,9 @@ api.isThenable = function(obj) {
 api.isPromise = function(obj) {
 	return (
 		obj &&
-		typeof obj.then == 'function' &&
-		typeof obj.catch == 'function' &&
-		typeof obj.finally == 'function'
+		typeof obj.then === 'function' &&
+		typeof obj.catch === 'function' &&
+		typeof obj.finally === 'function'
 	);
 };
 
@@ -1177,12 +1189,12 @@ api.isPromise = function(obj) {
 api.isDeferred = function(obj) {
 	return (
 		obj &&
-		typeof obj.addCallbacks == 'function' &&
-		typeof obj.addCallback == 'function' &&
-		typeof obj.addErrback == 'function' &&
-		typeof obj.addBoth == 'function' &&
-		typeof obj.state == 'function' &&
-		typeof obj.fired == 'number'
+		typeof obj.addCallbacks === 'function' &&
+		typeof obj.addCallback === 'function' &&
+		typeof obj.addErrback === 'function' &&
+		typeof obj.addBoth === 'function' &&
+		typeof obj.state === 'function' &&
+		typeof obj.fired === 'number'
 	);
 };
 
@@ -1236,7 +1248,11 @@ api.idleUntilUrgent = function(initFn) {
 };
 
 
-// variant2 of idleUntilUrgent
+/**
+ * variant2 of idleUntilUrgent
+ * @param {Function} init
+ * @return {IThenable}
+ */
 api.promiseIUU = function(init) {
 	var value;
 	var handle = requestIdleCallback(function() {
@@ -1251,6 +1267,98 @@ api.promiseIUU = function(init) {
 			}
 			return callback(value);
 		}
+	};
+};
+
+
+/**
+ * plain Idle Until Urgent in Philip's original (arguable simpler) style.
+ * Close to https://github.com/GoogleChromeLabs/idlize/blob/master/docs/IdleValue.md
+ * (But skip need to "new" it)
+ * todo: maybe also add his "queue" version?
+ * @param {Function} callback assumed to return a value (synchronously)
+ * @return {{getValue: *, setValue(*)}}
+ */
+api.idleValue = function(callback) {
+	var done = false; // use a separate flag instead of using undefined value check
+	var val = undefined;
+
+	var handle = requestIdleCallback(function() {
+		done = true;
+		handle = null;
+		val = callback();
+	});
+
+	return {
+		getValue: function() {
+			if (handle) {
+				cancelIdleCallback(handle);
+				handle = null;
+			}
+			if (done) {
+				return val;
+			}
+			val = callback();
+			return val;
+		},
+		// note that this is Not considered a new Idle, but a plain value.
+		// Simply re-assign entire Idle if new cycle is needed.
+		setValue: function(newVal) {
+			if (handle) {
+				cancelIdleCallback(handle);
+				handle = null;
+			}
+			val = newVal;
+			// todo: could chain the value?
+		}
+	};
+};
+
+/**
+ * promisifies a node.js API style function with a last arg as 'callback(err, data)'
+ * into a Promise (err=>catch, data=>then)
+ * todo: name...? we want to be able to use name 'promisify' also (for same conversion, but not node.js-callback-style)
+ *
+ * http://bluebirdjs.com/docs/api/promise.promisify.html
+ * https://nodejs.org/dist/latest-v8.x/docs/api/util.html#util_util_promisify_original
+ *
+ * @param {Function} nodeFn
+ * @retrun {function(): !Promise}
+ */
+api.promisifyNodeJsAPI = function(nodeFn) {
+	return function() {
+		var self = this;
+		var args = arguments;
+		return new Promise(function(resolve, reject) {
+			nodeFn.call(self, ...args, function(err, data) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(data);
+				}
+			});
+		});
+	};
+};
+
+/**
+ * test.
+ * todo: name clash? see "old" 'promisify' above, that is intended to handle *input* promises
+ * 	and maybe 'promisifyNodeJsAPI' should have this name?
+ *
+ * todo: hmm, now treats all (no throw) returns from fn as 'resolve'. maybe flags or such to
+ * translate "null", "-1", "false" or such => catch ? (add second optional arg "isError(ret)" or even a false-value!?)
+ *
+ * @param {Function} fn
+ * @return {function(): !Promise}
+ */
+api.promisifyFn = function(fn) {
+	return function() {
+		var self = this;
+		var args = arguments;
+		return new Promise(function(resolve, reject) {
+			resolve(fn.apply(self, args)); // throw -> reject automatically
+		});
 	};
 };
 
