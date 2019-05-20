@@ -722,6 +722,8 @@ using(getConnection(), function(conn) {
 
 
 /**
+ * @deprecated MK.Async.Deferred fork is thenable by default now
+ *
  * adds a .then() and .catch() method to the MK.Async.Deferred.prototype that returns a ES6 Promise. (and makes MK.Deferred "thenable" ('catch' not strictily necessary for that though))
  * (todo: maybe also/instead a .promise() method?)
  *
@@ -1360,6 +1362,76 @@ api.promisifyFn = function(fn) {
 			resolve(fn.apply(self, args)); // throw -> reject automatically
 		});
 	};
+};
+
+
+/**
+ * Delays running the executor until the
+ * first "then" is attached. useful?
+ *
+ * @param {Function} executor
+ * @return {IThenable} // todo: or try inherit/patch a real Promise?
+ */
+api.lazyPromise = function(executor) {
+	// fake using a thenable-ish-object. hmm, or monkey patch a real Promise?
+	return {
+		then: function(callback, errback) {
+			return new Promise(executor).then(callback, errback);
+		},
+		catch: function(errback) {
+			return this.then(null, errback);
+		}
+	};
+};
+
+/**
+ * shows the (blocking) window.confirm as a Promise
+ * todo: can be inline api!
+ * @param {string} msg
+ * @return {!Promise} "error" for false
+ */
+api.confirmDialog = function(msg) {
+	return new Promise((resolve, reject) => {
+		if (window.confirm(msg))
+			resolve();
+		else
+			reject();
+	});
+};
+
+/**
+ * shwos the (blocking) window.alert as a Promise
+ * will always result in success.
+ * todo: can be inline api!
+ * @param {string} msg
+ * @return {!Promise}
+ */
+api.alertDialog = function(msg) {
+	return new Promise(resolve => {
+		window.alert(msg);
+		resolve();
+	});
+};
+
+
+/**
+ * todo: DANG! path is from *this* file's location => Makes this almost unusable from other files..
+ * (unless we process paths to start at project root or such?..)
+ *
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
+ * https://developers.google.com/web/updates/2017/11/dynamic-import
+ *
+ * @param {string} module ES6 module path
+ * @return {!Promise}
+ */
+api.import = function(mod) {
+	'use strict'; // a must for import statement
+	// yes, dynamic import returns a Promise but it can
+	// throw on top-level so need to wrap!
+	return new Promise((resolve, reject) => {
+		// todo: !? failed module error can't be caught??
+		import(mod).then(resolve, reject);
+	});
 };
 
 
