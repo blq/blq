@@ -17,7 +17,8 @@ ns.ReadFileFormat = {
 	Base64: 'base64',
 	BinaryString: 'binarystring',
 	Text: 'text',
-	ArrayBuffer: 'arraybuffer'
+	ArrayBuffer: 'arraybuffer',
+	JSON: 'json' // 'text' but auto-parsed for convenience
 };
 
 
@@ -53,8 +54,8 @@ ns.parseDataUrl = function(dataUrl) {
  * @see https://developer.mozilla.org/en-US/docs/DOM/FileReader
  *
  * @param {!(File|Blob)} file (typically from <file> or drag'n drop operation)
- * @param {{output: (ReadFileFormat|string)}=} [options] (or just call it 'mode' or such?)
- * @return {!Promise} will also push progress updates using notify()
+ * @param {{output: (ReadFileFormat|string), progress: Function}=} [options] (or just call it 'mode' or such?)
+ * @return {!Promise}
  */
 ns.readFile = function(file, options) {
 	// assert(file != null);
@@ -70,15 +71,22 @@ ns.readFile = function(file, options) {
 		reader.onload = function(e) {
 			var data = this.result; // == e.target.result
 
-			if (options.output == 'base64') {
+			if (options.output === 'base64') {
 				var urlData = ns.parseDataUrl(data);
 				if (urlData == null) {
-					// error!
 					console.warn('blq.readFile: empty dataUrl');
-					// data = null?
-					// todo: errback!
+					reject();
+					return;
 				} else {
 					data = urlData.data;
+				}
+			} else
+			if (options.output === 'json') {
+				try {
+					data = JSON.parse(data);
+				} catch(ex) {
+					reject(ex);
+					return;
 				}
 			}
 
@@ -108,6 +116,7 @@ ns.readFile = function(file, options) {
 		// == blq.ReadFileFormat.*
 		switch (options.output) {
 			case 'text':
+			case 'json':
 				reader.readAsText(file); // default is 'UTF8'
 				break;
 
