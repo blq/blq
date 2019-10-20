@@ -47,7 +47,7 @@ api.createMapBoxGL = function(container, center, opt) {
 	opt = Object.assign({
 		accessToken: null,
 
-		style: 'mapbox://styles/mapbox/streets-v10', // 'mapbox://styles/mapbox/dark-v9' // todo: can append "&optimize=true"
+		style: 'mapbox://styles/mapbox/streets-v11', // 'mapbox://styles/mapbox/dark-v9' // todo: can append "&optimize=true"
 		zoom: 11,
 		bearing: 0,
 		pitch: 0,
