@@ -25,7 +25,7 @@ define([
 'use strict';
 
 // namespace
-var api = {};
+const api = {};
 
 /**
  * This is for jQuery < 3. 3+ uses real Promises
@@ -324,7 +324,7 @@ api.queuePromises = function(fn) {
  * But still not in official release (2.3.2 at time of writing)
  * @see https://github.com/requirejs/alameda/issues/8
  *
- * @param {!Array.<string>|string} scripts todo: allow iterable?
+ * @param {!Array<string>|string} scripts todo: allow iterable?
  * @return {!Promise}
  */
 api.requirePromise = function(scripts) {
@@ -410,7 +410,7 @@ api.createDeferred = function(executor) {
 api.promisify = function(fn) { // name? bindAsync? makeAsync?
 	// todo: maybe detect if already promisified? (add a tag? -> "unpromisify")
 	return function() {
-		var self = this;
+		const self = this;
 		return Promise.all(arguments).then(function(args) {
 			return fn.apply(self, args);
 		});
@@ -471,6 +471,7 @@ api.cancelablePromise = function(resolver) {
 
 /**
  * todo: name? delay()?
+ * todo: pipe version
  * @param {integer} ms
  * @return {!Promise}
  */
@@ -618,6 +619,7 @@ api.inline = function(apiFn, ...args) {
 
 // typically intended to be a pipe-through for an immediately executed function
 // p.then(pipe(console.log('I run now!'))).then(..)
+// todo: hmm, to run in the exact position need to create as a bind/partial! => p.then(pipe(console.log, 'I run now!')).then(..) <= todo: could then support inline "_" placeholders for the pipe result!
 // todo: hmm, Promise.then(x) actually says that if 'x' is Not a function it should be ignored. I.e get this behavior for free!
 api.pipe = function(ignored) {
 	// identity fn
@@ -1184,6 +1186,7 @@ api.isPromise = function(obj) {
 /**
  * does 'obj' fulfil the MochiKit.Async.Deferred interface?
  * https://blq.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred
+ * todo: and/or specify a looser "addCallbackable" similar to "thenable"? (drop state and fired etc)
  *
  * @param {*} obj
  * @return {boolean}
@@ -1205,7 +1208,7 @@ api.isDeferred = function(obj) {
  * trigger when browser is in idle mode
  * https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback
  * todo: cancel mechanism? (use cancelablePromise?)
- * todo: do you want to get the return from idle as result? or option to act as pipe?
+ * todo: hmm, you don't really want to get the return from idle as result? option or default to act as pipe?
  * @param {integer=} timeout ms
  * @return {!Promise}
  */
@@ -1217,6 +1220,7 @@ api.whenIdle = function(timeout) {
 
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
+ * todo: hmm, you don't really want to get the return from RAF as result? option or default to act as pipe?
  * @return {!Promise}
  */
 api.RAF = function() {
@@ -1431,6 +1435,66 @@ api.import = function(mod) {
 	return new Promise((resolve, reject) => {
 		// todo: !? failed module error can't be caught??
 		import(mod).then(resolve, reject);
+	});
+};
+
+
+/**
+ * Test of React's experimental "Suspense" API concept.
+ * https://reactjs.org/docs/concurrent-mode-suspense.html
+ * @param {!Promise} promise
+ * @return {!Suspense}
+ */
+api.wrapSuspense = function(promise) {
+	// based on example impl https://codesandbox.io/s/frosty-hermann-bztrp
+	let status = "pending";
+	let result;
+
+	let suspender = promise.then(
+		function(ret) {
+			status = "success";
+			result = ret;
+		},
+		function(err) {
+			status = "error";
+			result = err;
+		}
+	);
+
+	// todo: hmm, or make this obj also retain at least "thenable" API?
+	// (surely React must have discussed?)
+	return {
+		read: function() {
+			if (status === "pending") {
+				throw suspender;
+			} else if (status === "error") {
+				throw result;
+			} else if (status === "success") {
+				return result;
+			}
+		}
+	};
+};
+
+
+/**
+ * test making a Promise _also_ a suspense. Interesting for RPC proxy for example
+ * (via monkey patching. todo: hmmm, mod input or create new Promise? (see api.copy))
+ * @param {!Promise} p
+ * @return {!{ read: Function, then: function, catch: function }} // todo: typedef
+ */
+api.makeSuspendable = function(p) {
+	const susp = api.wrapSuspense(p);
+	p.read = susp.read;
+	return p;
+};
+
+
+// useful?
+// "clone"?
+api.copy = function(p) {
+	return new Promise(function(resolve, reject) {
+		p.then(resolve, reject);
 	});
 };
 
